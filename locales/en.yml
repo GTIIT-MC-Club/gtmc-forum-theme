@@ -1,3 +1,16 @@
 en:
+  gtmc_footer:
+    club_name: "GTMC · Minecraft Club of Guangdong Technion – Israel Institute of Technology"
+    summary: "We build together, tinker with redstone and run events. The forum is where announcements, builds and whitelist requests live."
+    links:
+      newcomer_guide: "Newcomer guide"
+      appeal: "Whitelist & appeals"
+      about: "About"
+      discord: "Join our Discord"
+    disclaimer: "Minecraft is a trademark of Mojang Synergies AB. This site is run by a student club of Guangdong Technion – Israel Institute of Technology and is not affiliated with Mojang or Microsoft."
   theme_metadata:
     description: "Dark-first Minecraft-flavoured theme for the GTMC club forum: grass-green accent, square corners, pixel font for the logo and a few titles."
+    settings:
+      discord_invite_url: "Discord invite link shown in the footer (https://discord.gg/…). Leave empty to hide the link."
+      footer_newcomer_guide_url: "Footer link to the newcomer guide. Written by infra/discourse/sidebar.rb to match the sidebar; do not edit by hand."
+      footer_appeal_url: "Footer link to the whitelist & appeals category. Written by infra/discourse/sidebar.rb; do not edit by hand."

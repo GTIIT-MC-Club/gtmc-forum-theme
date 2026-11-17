@@ -8,17 +8,17 @@ Discourse 主题：深色优先，草方块绿强调色，圆角收小、边框�
 ```
 about.json              主题元数据、两套配色、像素字体的注册
 common/common.scss      手机和桌面共用：字体声明、核心 CSS 变量覆盖、Logo、按钮
-desktop/desktop.scss    仅桌面：话题页标题、侧边栏分组标题与选中条、页头宽度固定（侧边栏开关不随侧边栏移动）
+desktop/desktop.scss    仅桌面：话题页标题、侧边栏分组标题与选中条、页头宽度固定（侧边栏开关不随侧边栏移动）、侧边栏展开时页脚与正文对齐
 （没有 mobile/：手机端目前不需要额外样式，话题页标题因此保持正文字体；需要时再加 mobile/mobile.scss。
  当前版本的核心不按设备二选一，而是给桌面样式表加 media="(width >= 40rem)"：视口不小于 640px 就加载，
  所以手机竖屏不受 desktop.scss 影响，但横屏的平板会加载它。）
-locales/                主题描述（theme_metadata.description），没有其他界面文字
+javascripts/            页脚组件（Glimmer）和挂载它的 api-initializer，见「页脚」
+locales/                主题描述、设置项说明（theme_metadata）和页脚的界面文字（中英文）
+settings.yml            主题设置：Discord 邀请链接和页脚的两个站内链接，见「页脚」
 assets/                 子集化后的像素字体（woff2）、像素图标精灵 gtmc-icons.svg（由 icons/ 生成）
 icons/                  像素图标的源文件（每个图标一个 16×16 文本网格）和生成精灵的脚本，见「图标」
 fonts/                  字体的许可文件、子集字符表（不随主题上传时也要保留，见下）
 ```
-
-这个主题没有 `settings.yml`：目前没有任何需要管理员在后台调的值。有了再加。
 
 ## 开发
 
@@ -38,7 +38,7 @@ discourse_theme watch theme/        # 首次运行会问站点地址和 API Key�
 否则直接把根目录当主题根（`zip_importer.rb` 的 `strip_root_directory`），`about.json` 放在压缩包顶层即可：
 
 ```sh
-cd theme && zip -r ../gtmc-theme.zip about.json assets common desktop locales
+cd theme && zip -r ../gtmc-theme.zip about.json assets common desktop javascripts locales settings.yml
 ```
 
 后台 → 外观 → 主题 → 安装 → 从你的设备，选择压缩包。之后改了主题再传一次同名压缩包即可更新。
@@ -57,6 +57,7 @@ cd theme && zip -r ../gtmc-theme.zip about.json assets common desktop locales
 4. **Logo**：不要上传 Logo 图片（核心默认的 Logo 图已由 `site_settings.rb` 清掉）。站点没有 Logo 图片时，页头显示站点标题文字（`site_settings.rb` 设的「GTMC 论坛」），
    这段文字就是用像素字体渲染的。上传了图片则不会走像素字体。
 5. **侧边栏与版块图标**：导入主题之后执行 `infra/discourse/sidebar.rb`（它要用主题里的图标，所以排在导入之后），不要在后台手动配。见 `infra/content/admin-setup.md` 第一节。
+6. **页脚的 Discord 链接**：外观 → 主题 → GTMC → 设置，把 `discord_invite_url` 填成社团的 Discord 邀请链接；留空则页脚不显示这个链接。
 
 ## 配色与对比度
 
@@ -168,6 +169,24 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 2. 在仓库根目录运行 `ruby theme/icons/build_sprite.rb`（只用标准库），它会检查行数和字符并重写 `assets/gtmc-icons.svg`。
 3. 把 `.txt` 和重新生成的 `.svg` 一起提交，在上表补一行，然后重新导入主题。
 4. 在浏览器里看 16px 下的效果：深浅两套配色都看一遍。
+
+## 页脚
+
+`javascripts/discourse/components/gtmc-footer.gjs` 是全站页脚：社团名和一句简介、三到四个链接、Minecraft 商标声明。
+`javascripts/discourse/api-initializers/gtmc-footer.js` 用 `api.renderInOutlet("below-footer", …)` 把它挂在页面最底部。
+选这个出口是因为它在核心自定义页脚（后台的「自定义 HTML」页脚）之后、所有页面都有，并带 `showFooter` 参数：
+核心在话题列表、帖子读到底之前把它置为 `false`（无限滚动），组件据此隐藏，否则页脚会夹在列表中间。
+
+- **文字**：全部在 `locales/zh_CN.yml` 和 `locales/en.yml` 的 `gtmc_footer` 下，经 `themePrefix` 取用，改文字不用动组件。
+- **链接**：来自 `settings.yml` 的三个设置，留空的不显示；「关于」是核心自带页面，地址固定为 `/about`。
+  - `discord_invite_url`：管理员在后台填（邀请会过期、会重建，没有能写死的值）。
+  - `footer_newcomer_guide_url`、`footer_appeal_url`：由 `infra/discourse/sidebar.rb` 写入，与侧边栏指向同一处。
+    地址带数据库 id（`/c/<名字>/<id>`、`/t/<名字>/<id>`），每个站点不同，所以不能写死在主题里。
+    **不要在后台手改**，重跑 `sidebar.rb` 会改回来。
+- **样式**：在 `common/common.scss`，只用 CSS 变量，类名以 `gtmc-footer` 开头；手机宽度下链接自动换行。
+  页脚在侧边栏所在的网格之外，侧边栏展开时由 `desktop/desktop.scss` 让它跟正文一样加宽并让出左边一栏，否则会比正文偏左。
+- **商标声明**：Minecraft 是 Mojang Synergies AB 的商标；本站是学生社团自办，与 Mojang、Microsoft 无关。
+  这句话要保留，文字改动前先和负责人确认。
 
 ## 待验证
 

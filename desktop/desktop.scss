@@ -31,3 +31,12 @@
 .d-header > .wrap {
   max-width: calc(var(--d-sidebar-width) + var(--d-max-width));
 }
+
+// 页脚跟着正文对齐：侧边栏展开时核心把正文区加宽一个侧边栏宽度，再让出左边一栏（侧边栏）加一个间隙。
+// 页脚在侧边栏的网格之外（出口 below-footer），得自己照核心 `body.has-sidebar-page .wrap` 的做法加宽并让出左边。
+body.has-sidebar-page .gtmc-footer {
+  max-width: calc(var(--d-sidebar-width) + var(--d-max-width));
+  padding-left: calc(
+    var(--d-wrap-padding-x) + var(--d-sidebar-width) + var(--d-main-content-gap)
+  );
+}

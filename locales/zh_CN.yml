@@ -1,3 +1,16 @@
 zh_CN:
+  gtmc_footer:
+    club_name: "GTMC 广东以色列理工学院 Minecraft 社团"
+    summary: "一起建造、一起折腾红石、一起办活动。论坛用来发公告、晒作品、办白名单。"
+    links:
+      newcomer_guide: "新人指南"
+      appeal: "白名单与申诉"
+      about: "关于"
+      discord: "加入 Discord"
+    disclaimer: "Minecraft 是 Mojang Synergies AB 的商标；本站为广东以色列理工学院学生社团自办，与 Mojang、Microsoft 无关。"
   theme_metadata:
     description: "GTMC 社团论坛主题：深色优先，草方块绿强调色，圆角收小，Logo 与少数标题使用像素字体。"
+    settings:
+      discord_invite_url: "页脚「加入 Discord」的邀请链接（https://discord.gg/…）。留空则页脚不显示这个链接。"
+      footer_newcomer_guide_url: "页脚「新人指南」的地址。由 infra/discourse/sidebar.rb 写入，与侧边栏一致，不要手改。"
+      footer_appeal_url: "页脚「白名单与申诉」的版块地址。由 infra/discourse/sidebar.rb 写入，不要手改。"
