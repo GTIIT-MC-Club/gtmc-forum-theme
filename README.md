@@ -63,8 +63,8 @@ docker cp theme app:/tmp/gtmc-theme && docker cp infra/discourse/import_theme.rb
 1. **字体**：基础字体和标题字体用系统字体，已由 `infra/discourse/site_settings.rb` 设置
    （`base_font` / `heading_font` 均为 `system`），不需要手动操作。
    原因：核心默认是 Inter，它不含中文，中文会回落到系统字体但字重和间距不一致。
-2. **Logo**：不要上传 Logo 图片（核心默认的 Logo 图已由 `site_settings.rb` 清掉）。站点没有 Logo 图片时，页头显示站点标题文字（`site_settings.rb` 设的「GTMC 论坛」），
-   这段文字就是用像素字体渲染的。上传了图片则不会走像素字体。
+2. **Logo**：管理员在后台上传 `design/brand/gtmc-logo-3x.png`（步骤见 `infra/content/admin-setup.md`）。
+   主题只给 `#site-logo` 加 `image-rendering: pixelated`，缩放时像素保持方块。小 Logo 还没定稿，暂用核心默认。
 3. **侧边栏与版块图标**：导入主题之后执行 `infra/discourse/sidebar.rb`（它要用主题里的图标，所以排在导入之后），不要在后台手动配。见 `infra/content/admin-setup.md` 的执行顺序一节。
 4. **页脚的 Discord 链接**：外观 → 主题 → GTMC → 设置，把 `discord_invite_url` 填成社团的 Discord 邀请链接；留空则页脚不显示这个链接。
 
@@ -334,8 +334,5 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 下面这些还**没有逐项在运行中的站上核对过**（只做了静态检查，或只对照过核心源码）：
 
 - 桌面和手机宽度下，首页、话题页、发帖框、用户页、管理后台有没有错位或看不清的文字。
-- `#site-text-logo`、`.sidebar-section-link.active`
-  这几个核心选择器在当前 Discourse 版本里是否仍然命中（只对照过 `discourse/discourse` 主分支的源码，没有对着运行中的实例看过）。
 - 像素字体是否被 Discourse 正确上传并通过 `$gtmc-pixel-font` 注入（浏览器开发者工具里看 `@font-face` 的 `src` 是否是 `/uploads/...`）。
 - 压缩包导入是否把 `about.json` 的两套配色、字体资源都建出来。
-- 手机端 24px 的 Logo 文字在页头里是否放得下；放不下就新增 `mobile/mobile.scss` 把 `--gtmc-logo-font-size` 调小。

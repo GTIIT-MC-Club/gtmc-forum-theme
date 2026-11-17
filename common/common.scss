@@ -12,9 +12,6 @@
 }
 
 :root {
-  // Logo 文字的字号，取 12px 的整数倍（原因见上）
-  --gtmc-logo-font-size: 24px;
-
   // 右栏宽度，取自设计稿 c-server-first.html：放得下服务器面板一行（图标块、服名、版本、人数）不折行
   --gtmc-right-rail-width: 300px;
 
@@ -141,13 +138,10 @@
   font-weight: normal;
 }
 
-// 核心用 `.d-header #site-text-logo` 设了 font-size（--font-up-3，约 24.25px），只写 #site-text-logo 压不过它；
-// 非 12px 整数倍的字号会让像素笔画发糊，所以这里跟核心用同样的针对性。
-.d-header #site-text-logo {
-  font-family: var(--gtmc-font-pixel);
-  font-size: var(--gtmc-logo-font-size);
-  font-weight: normal; // 像素字体没有粗体，浏览器合成的粗体会让笔画糊在一起
-  line-height: 1;
+// 社团 Logo 是像素画（design/brand/gtmc-logo-3x.png，由管理员在后台上传）。浏览器缩放图片时默认做平滑插值，
+// 像素边缘会糊成一片；pixelated 让每个像素保持方块。
+#site-logo {
+  image-rendering: pixelated;
 }
 
 // 实心按钮（默认、主、危险、成功；不带变体类的 .btn 核心也按默认按钮画）：方块下沿，按下时下沿消失并下移。
