@@ -193,6 +193,13 @@ function sameRect(first, second) {
  * 只在浏览器主线程上使用；所有状态都在实例里，同一文档上装两个实例互不影响（测试里就是这样）。
  */
 export default class GtmcGlobalTooltip {
+  /** 用主题样式表里的 --gtmc-tooltip-delay 作为延迟，给页面上的提示层建一个实例。 */
+  static forLayer(layer) {
+    return new GtmcGlobalTooltip(layer, {
+      delayMillis: readTooltipDelayMillis(layer),
+    });
+  }
+
   #layer;
   #document;
   #window;
@@ -212,13 +219,6 @@ export default class GtmcGlobalTooltip {
   #warmUntil = 0;
   #warmPlacement = null;
 
-  /** 用主题样式表里的 --gtmc-tooltip-delay 作为延迟，给页面上的提示层建一个实例。 */
-  static forLayer(layer) {
-    return new GtmcGlobalTooltip(layer, {
-      delayMillis: readTooltipDelayMillis(layer),
-    });
-  }
-
   /**
    * @param {HTMLElement} layer 提示层元素，已经在文档里
    * @param {{delayMillis: number}} options 第一次出现前的停留时间，取自 CSS 变量 --gtmc-tooltip-delay
@@ -228,6 +228,10 @@ export default class GtmcGlobalTooltip {
     this.#document = layer.ownerDocument;
     this.#window = this.#document.defaultView;
     this.#delayMillis = delayMillis;
+  }
+
+  get #isOpen() {
+    return this.#activeTarget !== null && !this.#layer.hidden;
   }
 
   install() {
@@ -259,10 +263,6 @@ export default class GtmcGlobalTooltip {
     const bound = handler.bind(this);
     target.addEventListener(type, bound, capture);
     this.#listeners.push([target, type, bound, capture]);
-  }
-
-  get #isOpen() {
-    return this.#activeTarget !== null && !this.#layer.hidden;
   }
 
   #groupOf(target) {
@@ -348,9 +348,7 @@ export default class GtmcGlobalTooltip {
       viewport.height - VIEWPORT_EDGE_PADDING_PX;
     return {
       placement: fitsBelow ? "bottom" : "top",
-      left: fitsRight
-        ? x + TOOLTIP_GAP_PX
-        : x - TOOLTIP_GAP_PX - size.width,
+      left: fitsRight ? x + TOOLTIP_GAP_PX : x - TOOLTIP_GAP_PX - size.width,
       top: fitsBelow ? y + TOOLTIP_GAP_PX : y - TOOLTIP_GAP_PX - size.height,
     };
   }

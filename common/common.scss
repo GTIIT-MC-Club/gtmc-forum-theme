@@ -52,8 +52,10 @@
   // 动效只用这三个令牌（AGENTS.md「界面规则」，README「视觉规范 · 动效」），主题和插件共用。
   // 状态切换 120ms：快到点下去感觉不到延迟，又能让颜色切换不生硬。
   --gtmc-duration-state: 120ms;
+
   // 提示停留 400ms 才出现，鼠标扫过不会闪
   --gtmc-tooltip-delay: 400ms;
+
   // 先快后慢的减速曲线，取自设计稿 c-server-first.html
   --gtmc-ease: cubic-bezier(0.2, 0, 0, 1);
 
@@ -261,7 +263,9 @@ a:focus-visible,
 // 版块徽章里核心用 `.badge-category__wrapper .badge-category.--style-icon .d-icon` 定成 0.74em，
 // 第二个选择器与它针对性相同，靠主题样式表在核心之后加载取胜。
 .d-icon[class*="d-icon-gtmc-"],
-.badge-category__wrapper .badge-category.--style-icon .d-icon[class*="d-icon-gtmc-"] {
+.badge-category__wrapper
+  .badge-category.--style-icon
+  .d-icon[class*="d-icon-gtmc-"] {
   width: var(--gtmc-icon-size);
   height: var(--gtmc-icon-size);
 }
@@ -415,7 +419,6 @@ a:focus-visible,
   // 箭头是核心注入的 SVG，两条路径分别取这两个变量；跟着底色一起换，否则深底上挂一个浅色箭头
   --float-kit-arrow-stroke-color: var(--primary);
   --float-kit-arrow-fill-color: var(--primary);
-
   border: none;
   border-radius: var(--d-border-radius);
   background-color: var(--primary);

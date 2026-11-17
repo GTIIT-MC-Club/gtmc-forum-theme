@@ -1,10 +1,10 @@
 import Component from "@glimmer/component";
+import { themePrefix } from "virtual:theme";
 import PluginOutlet from "discourse/components/plugin-outlet";
 import TopicParticipants from "discourse/components/topic-map/topic-participants";
 import lazyHash from "discourse/helpers/lazy-hash";
-import { themePrefix } from "virtual:theme";
 import { i18n } from "discourse-i18n";
-import GtmcSameCategoryTopics from "./gtmc-same-category-topics";
+import GtmcSameCategoryTopics from "./gtmc-same-category-topics.gjs";
 
 // 话题页的右栏：参与者、同版块话题、插件出口 gtmc-right-rail，下面紧接核心的时间线（当作「阅读进度」面板）。
 // 挂在核心的 topic-navigation 出口里，也就是时间线所在的那一栏：话题页正文（约 760px）加一条独立的右栏放不下，

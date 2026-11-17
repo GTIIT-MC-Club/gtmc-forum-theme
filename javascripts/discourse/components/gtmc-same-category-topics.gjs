@@ -1,8 +1,8 @@
 import Component from "@glimmer/component";
+import { themePrefix } from "virtual:theme";
 import { ajax } from "discourse/lib/ajax";
 import DAsyncContent from "discourse/ui-kit/d-async-content";
 import dFormatDate from "discourse/ui-kit/helpers/d-format-date";
-import { themePrefix } from "virtual:theme";
 import { i18n } from "discourse-i18n";
 
 // 设计稿 c-topic.html 画了 3 条：右栏和时间线共用一屏，再多就把时间线挤到首屏以外

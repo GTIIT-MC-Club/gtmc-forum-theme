@@ -1,6 +1,6 @@
 import { module, test } from "qunit";
 import sinon from "sinon";
-import GtmcGlobalTooltip from "../../../discourse/lib/gtmc-global-tooltip";
+import GtmcGlobalTooltip from "../../../discourse/lib/gtmc-global-tooltip.js";
 
 const DELAY_MILLIS = 400;
 const LAYER_WIDTH = 100;
@@ -63,7 +63,7 @@ module("Unit | Theme | gtmc-global-tooltip", function (hooks) {
     });
     this.tooltip.install();
 
-    this.render = (html) => {
+    this.renderFixture = (html) => {
       this.fixture.innerHTML = html;
     };
     this.find = (selector) => this.fixture.querySelector(selector);
@@ -78,13 +78,18 @@ module("Unit | Theme | gtmc-global-tooltip", function (hooks) {
   });
 
   test("it waits for the delay, then shows the text beside the pointer and follows it", function (assert) {
-    this.render(`<button id="copy" data-tooltip="复制地址">copy</button>`);
+    this.renderFixture(
+      `<button id="copy" data-tooltip="复制地址">copy</button>`
+    );
     const button = this.find("#copy");
     stubRect(button, { left: 200, top: 100, width: 40, height: 24 });
 
     pointerOver(button, { x: 210, y: 110 });
     this.clock.tick(DELAY_MILLIS - 1);
-    assert.false(this.isOpen(), "still hidden one millisecond before the delay");
+    assert.false(
+      this.isOpen(),
+      "still hidden one millisecond before the delay"
+    );
 
     this.clock.tick(1);
     assert.true(this.isOpen(), "shown once the delay has passed");
@@ -98,13 +103,18 @@ module("Unit | Theme | gtmc-global-tooltip", function (hooks) {
   });
 
   test("it anchors to the control right away when the control receives keyboard focus", function (assert) {
-    this.render(`<button id="copy" data-tooltip="复制地址">copy</button>`);
+    this.renderFixture(
+      `<button id="copy" data-tooltip="复制地址">copy</button>`
+    );
     const button = this.find("#copy");
     stubRect(button, { left: 200, top: 100, width: 40, height: 24 });
 
     keyboardFocus(button);
 
-    assert.true(this.isOpen(), "keyboard users get the tooltip without a delay");
+    assert.true(
+      this.isOpen(),
+      "keyboard users get the tooltip without a delay"
+    );
     assert.strictEqual(this.layer.dataset.placement, "bottom");
     assert.strictEqual(
       this.layer.style.left,
@@ -115,7 +125,7 @@ module("Unit | Theme | gtmc-global-tooltip", function (hooks) {
   });
 
   test("it swaps instantly between controls of one group and waits again outside the group", function (assert) {
-    this.render(`
+    this.renderFixture(`
       <div data-tooltip-group>
         <button id="first" data-tooltip="First">1</button>
         <button id="second" data-tooltip="Second">2</button>
@@ -149,7 +159,7 @@ module("Unit | Theme | gtmc-global-tooltip", function (hooks) {
   });
 
   test("it waits the full delay again after the group has cooled down", function (assert) {
-    this.render(`
+    this.renderFixture(`
       <div data-tooltip-group>
         <button id="first" data-tooltip="First">1</button>
         <span id="gap">gap</span>
@@ -163,7 +173,10 @@ module("Unit | Theme | gtmc-global-tooltip", function (hooks) {
     this.clock.tick(DELAY_MILLIS);
     pointerLeave(first, this.find("#gap"));
     this.clock.tick(DELAY_MILLIS + 1);
-    assert.false(this.isOpen(), "the tooltip closed while the pointer rested on the gap");
+    assert.false(
+      this.isOpen(),
+      "the tooltip closed while the pointer rested on the gap"
+    );
 
     pointerOver(second, { x: 40, y: 10 });
     assert.false(this.isOpen(), "the group is no longer warm");
@@ -172,7 +185,7 @@ module("Unit | Theme | gtmc-global-tooltip", function (hooks) {
   });
 
   test("it flips to the opposite side when the preferred side does not fit", function (assert) {
-    this.render(
+    this.renderFixture(
       `<button id="last" data-tooltip="Last" data-tooltip-anchor="target">x</button>`
     );
     const button = this.find("#last");
@@ -193,7 +206,7 @@ module("Unit | Theme | gtmc-global-tooltip", function (hooks) {
   });
 
   test("it flips to the left of and above the pointer near the bottom-right corner", function (assert) {
-    this.render(`<button id="corner" data-tooltip="Corner">x</button>`);
+    this.renderFixture(`<button id="corner" data-tooltip="Corner">x</button>`);
     const button = this.find("#corner");
     const x = window.innerWidth - 20;
     const y = window.innerHeight - 20;
@@ -207,7 +220,9 @@ module("Unit | Theme | gtmc-global-tooltip", function (hooks) {
   });
 
   test("it closes on Escape and on pointer down", function (assert) {
-    this.render(`<button id="copy" data-tooltip="复制地址">copy</button>`);
+    this.renderFixture(
+      `<button id="copy" data-tooltip="复制地址">copy</button>`
+    );
     const button = this.find("#copy");
 
     keyboardFocus(button);
@@ -222,7 +237,9 @@ module("Unit | Theme | gtmc-global-tooltip", function (hooks) {
   });
 
   test("it ignores the mouseover that touch screens emit after a tap", function (assert) {
-    this.render(`<button id="copy" data-tooltip="复制地址">copy</button>`);
+    this.renderFixture(
+      `<button id="copy" data-tooltip="复制地址">copy</button>`
+    );
     const button = this.find("#copy");
 
     button.dispatchEvent(
