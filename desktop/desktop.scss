@@ -16,6 +16,7 @@
 
 // 当前所在的侧边栏条目：左侧一条强调色竖线。核心没有给这条线留变量，所以只能选核心的类；
 // 核心改了 .sidebar-section-link 的类名这条线会消失，但不影响功能。
+// 3px 与上面的 2px 下划线加粗同一量级，能看见又不挤占链接文字的左边距。
 .sidebar-section-link.active {
   box-shadow: inset 3px 0 0 var(--tertiary);
 }

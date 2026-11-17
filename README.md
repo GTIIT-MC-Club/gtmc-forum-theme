@@ -9,7 +9,8 @@ Discourse 主题：深色优先，草方块绿强调色，圆角收小、边框�
 about.json              主题元数据、两套配色、像素字体的注册
 common/common.scss      手机和桌面共用：字体声明、核心 CSS 变量覆盖、Logo、按钮
 desktop/desktop.scss    仅桌面：话题页标题、侧边栏分组标题与选中条
-mobile/mobile.scss      仅手机：话题页标题回退到正文字体
+（没有 mobile/：手机端目前不需要额外样式，话题页标题因此保持正文字体；需要时再加 mobile/mobile.scss。
+ 桌面和手机的样式表是分开编译、按设备二选一加载的，所以 desktop.scss 里的规则不会影响手机。）
 locales/                主题描述（theme_metadata.description），没有其他界面文字
 assets/                 子集化后的像素字体（woff2）
 fonts/                  字体的许可文件、子集字符表（不随主题上传时也要保留，见下）
@@ -30,10 +31,12 @@ discourse_theme watch theme/        # 首次运行会问站点地址和 API Key�
 
 ## 部署到论坛
 
-主题放在仓库的 `theme/` 子目录，Discourse 的「从 Git 仓库安装」要求主题在仓库根目录，所以用压缩包：
+主题放在仓库的 `theme/` 子目录。Discourse 的「从 Git 仓库安装」会克隆整个仓库并在仓库根目录找 `about.json`
+（核心的 `git_importer.rb` 里没有子目录选项），所以这里用压缩包。压缩包导入时，如果解压后只有一个顶层文件夹会自动剥掉，
+否则直接把根目录当主题根（`zip_importer.rb` 的 `strip_root_directory`），`about.json` 放在压缩包顶层即可：
 
 ```sh
-cd theme && zip -r ../gtmc-theme.zip about.json assets common desktop mobile locales
+cd theme && zip -r ../gtmc-theme.zip about.json assets common desktop locales
 ```
 
 后台 → 外观 → 主题 → 安装 → 从你的设备，选择压缩包。之后改了主题再传一次同名压缩包即可更新。
@@ -124,7 +127,7 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 
 - 桌面和手机宽度下，首页、话题页、发帖框、用户页、管理后台有没有错位或看不清的文字。
 - `#site-text-logo`、`#topic-title .fancy-title`、`.sidebar-section-header-text`、`.sidebar-section-link.active`
-  这几个核心选择器在当前 Discourse 版本里是否仍然命中。
+  这几个核心选择器在当前 Discourse 版本里是否仍然命中（只对照过 `discourse/discourse` 主分支的源码，没有对着运行中的实例看过）。
 - 像素字体是否被 Discourse 正确上传并通过 `$gtmc-pixel-font` 注入（浏览器开发者工具里看 `@font-face` 的 `src` 是否是 `/uploads/...`）。
 - 压缩包导入是否把 `about.json` 的两套配色、字体资源都建出来。
-- 手机端 24px 的 Logo 文字在页头里是否放得下。
+- 手机端 24px 的 Logo 文字在页头里是否放得下；放不下就新增 `mobile/mobile.scss` 把 `--gtmc-pixel-size-title` 调小。
