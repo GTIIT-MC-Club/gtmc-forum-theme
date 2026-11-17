@@ -49,8 +49,9 @@ cd theme && zip -r ../gtmc-theme.zip about.json assets common desktop locales
    - 这个主题**没有**使用 `only_theme_color_schemes`，`GTMC Light` 不会自动出现在用户的界面偏好里。
      想让用户能切换，到 外观 → 配色方案 → `GTMC Light`，勾选允许用户选择（核心字段名 `user_selectable`，界面文字以当前版本为准）。
    - 在主题的配色设置里，把「深色模式配色」也指向 `GTMC Dark`，免得系统是深色模式的访客看到核心自带的 Dark。
-3. **字体**：外观 → 字体，基础字体和标题字体都选 `System`（系统字体）。核心默认是 Inter，
-   它不含中文，中文会回落到系统字体但字重和间距不一致；直接选 System 最稳。
+3. **字体**：基础字体和标题字体用系统字体，已由 `infra/discourse/site_settings.rb` 设置
+   （`base_font` / `heading_font` 均为 `system`），不需要手动操作。
+   原因：核心默认是 Inter，它不含中文，中文会回落到系统字体但字重和间距不一致。
 4. **Logo**：不要上传 Logo 图片。站点没有 Logo 图片时，页头显示站点标题文字（`site_settings.rb` 设的「GTMC 论坛」），
    这段文字就是用像素字体渲染的。上传了图片则不会走像素字体。
 5. **侧边栏**：核心的 `navigation_menu` 设置默认就是 `sidebar`，无需操作；分区和链接的配置见 `infra/README.md`。
