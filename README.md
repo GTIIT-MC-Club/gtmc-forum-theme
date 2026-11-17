@@ -8,9 +8,10 @@ Discourse 主题：深色优先，草方块绿强调色，圆角收小、边框�
 ```
 about.json              主题元数据、两套配色、像素字体的注册
 common/common.scss      手机和桌面共用：字体声明、核心 CSS 变量覆盖、Logo、按钮
-desktop/desktop.scss    仅桌面：话题页标题、侧边栏分组标题与选中条
+desktop/desktop.scss    仅桌面：话题页标题、侧边栏分组标题与选中条、页头宽度固定（侧边栏开关不随侧边栏移动）
 （没有 mobile/：手机端目前不需要额外样式，话题页标题因此保持正文字体；需要时再加 mobile/mobile.scss。
- 桌面和手机的样式表是分开编译、按设备二选一加载的，所以 desktop.scss 里的规则不会影响手机。）
+ 当前版本的核心不按设备二选一，而是给桌面样式表加 media="(width >= 40rem)"：视口不小于 640px 就加载，
+ 所以手机竖屏不受 desktop.scss 影响，但横屏的平板会加载它。）
 locales/                主题描述（theme_metadata.description），没有其他界面文字
 assets/                 子集化后的像素字体（woff2）、像素图标精灵 gtmc-icons.svg（由 icons/ 生成）
 icons/                  像素图标的源文件（每个图标一个 16×16 文本网格）和生成精灵的脚本，见「图标」

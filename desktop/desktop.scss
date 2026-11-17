@@ -20,3 +20,14 @@
 .sidebar-section-link.active {
   box-shadow: inset 3px 0 0 var(--tertiary);
 }
+
+// 页头内容区固定按「有侧边栏」的宽度排版，让左上角的侧边栏开关在展开、收起侧边栏时不左右移动。
+// 原因：页头和正文共用核心的 .wrap（max-width: --d-max-width，水平居中）；核心在侧边栏展开时用
+// `body.has-sidebar-page .wrap` 把它加宽一个 --d-sidebar-width，收起时又变回去，居中的页头随之整体平移
+// （1440px 宽时开关从 x=56 跳到 x=176），核心还给这段宽度变化加了过渡动画。
+// 这里只改页头，正文仍跟随侧边栏变宽变窄。选择器比核心的 .wrap 多一级 .d-header，才能在侧边栏收起时压过它；
+// 展开时核心规则给出的值和这里相同，不冲突。
+// 手机宽度不加载本文件（样式表带 media="(width >= 40rem)"），而且手机视图没有这个开关，行为不变。
+.d-header > .wrap {
+  max-width: calc(var(--d-sidebar-width) + var(--d-max-width));
+}
