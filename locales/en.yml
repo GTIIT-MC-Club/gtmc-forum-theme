@@ -8,6 +8,14 @@ en:
       about: "About"
       discord: "Join our Discord"
     disclaimer: "Minecraft is a trademark of Mojang Synergies AB. This site is run by a student club of Guangdong Technion – Israel Institute of Technology and is not affiliated with Mojang or Microsoft."
+  gtmc_rail:
+    participants:
+      title: "Participants"
+      count_tooltip: "%{count} people in this discussion"
+    same_category:
+      title: "More in this category"
+      empty: "No other topics in this category yet."
+      failed: "Could not load topics from this category. Refresh the page to try again."
   theme_metadata:
     description: "Dark-first Minecraft-flavoured theme for the GTMC club forum: grass-green accent, square corners, pixel font for the logo only."
     settings:

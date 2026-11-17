@@ -15,6 +15,9 @@
   // Logo 文字的字号，取 12px 的整数倍（原因见上）
   --gtmc-logo-font-size: 24px;
 
+  // 右栏宽度，取自设计稿 c-server-first.html：放得下服务器面板一行（图标块、服名、版本、人数）不折行
+  --gtmc-right-rail-width: 300px;
+
   // 像素图标按 8×8 网格画，显示尺寸只取 8px 的整数倍，一格才对应整数个屏幕像素（README「图标」）
   --gtmc-icon-size: 16px;
 
@@ -226,4 +229,93 @@ a:focus-visible,
 .badge-category__wrapper .badge-category.--style-icon .d-icon[class*="d-icon-gtmc-"] {
   width: var(--gtmc-icon-size);
   height: var(--gtmc-icon-size);
+}
+
+// 右栏的面板（话题页的参与者、同版块话题；插件的服务器、新人进服等面板也用这个类，见 README「右栏」）。
+// 面板只是信息块，不是链接，没有悬停效果；面板里能点的东西各自按交互规则走。
+.gtmc-rail-panel {
+  margin: 0; // 面板之间的间隔由右栏的 gap 统一给出
+  padding: var(--space-4);
+  border: 1px solid var(--content-border-color);
+  border-radius: var(--d-border-radius);
+  font-size: var(--font-down-1);
+}
+
+.gtmc-rail-panel-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-0);
+
+  small {
+    color: var(--primary-medium);
+    font-size: var(--font-down-1);
+    font-weight: normal;
+  }
+}
+
+// 空状态和失败时的一句话；与有内容时的第一行同高，面板不会因为没内容而塌下去
+.gtmc-rail-panel-placeholder {
+  margin: 0;
+  color: var(--primary-medium);
+}
+
+// 参与者头像：核心的 TopicParticipants 组件，样式核心只写在话题地图里（.topic-map__users-content 下），
+// 这里只取它的两个内层类。头像取 24px，与设计稿一致，是 8 的整数倍。
+.gtmc-topic-participants {
+  --gtmc-participant-avatar-size: 24px;
+
+  .topic-map__users-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  a {
+    position: relative;
+    display: block;
+  }
+
+  img.avatar {
+    display: block;
+    width: var(--gtmc-participant-avatar-size);
+    height: var(--gtmc-participant-avatar-size);
+    border-radius: var(--d-border-radius);
+  }
+
+  // 帖子数角标：贴在头像右上角
+  .post-count {
+    position: absolute;
+    top: calc(-1 * var(--space-1));
+    right: calc(-1 * var(--space-1));
+    padding: 0 var(--space-1);
+    border-radius: var(--d-border-radius);
+    background: var(--primary-medium);
+    color: var(--secondary);
+    font-size: var(--font-down-3);
+    line-height: var(--line-height-medium);
+  }
+}
+
+.gtmc-same-category-topics-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li + li {
+    border-top: 1px dashed var(--content-border-color);
+  }
+
+  a {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-2) 0;
+    color: var(--primary);
+  }
+}
+
+.gtmc-same-category-topic-age {
+  color: var(--primary-medium);
 }

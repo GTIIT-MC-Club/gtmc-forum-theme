@@ -8,11 +8,11 @@ Discourse 主题：浅色、深色两套配色跟随系统，草方块绿强调�
 ```
 about.json              主题元数据、两套配色、像素字体的注册
 common/common.scss      手机和桌面共用：字体声明、核心 CSS 变量覆盖、Logo、按钮
-desktop/desktop.scss    仅桌面：侧边栏选中条、页面宽度固定（侧边栏收起时不变窄，开关不动）、侧边栏展开时页脚与正文对齐
+desktop/desktop.scss    仅桌面：侧边栏选中条、页面宽度固定（侧边栏收起时不变窄，开关不动）、侧边栏展开时页脚与正文对齐、右栏的分栏
 （没有 mobile/：手机端目前不需要额外样式，需要时再加 mobile/mobile.scss。
  当前版本的核心不按设备二选一，而是给桌面样式表加 media="(width >= 40rem)"：视口不小于 640px 就加载，
  所以手机竖屏不受 desktop.scss 影响，但横屏的平板会加载它。）
-javascripts/            页脚组件（Glimmer）和挂载它的 api-initializer，见「页脚」
+javascripts/            页脚、右栏的组件（Glimmer）和挂载它们的 api-initializer，见「页脚」「右栏」
 locales/                主题描述、设置项说明（theme_metadata）和页脚的界面文字（中英文）
 settings.yml            主题设置：Discord 邀请链接和页脚的两个站内链接，见「页脚」
 assets/                 子集化后的像素字体（woff2）
@@ -242,6 +242,26 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 2. 存成 `icons/gtmc-<英文名>.svg`（改已有图标就直接覆盖那个文件）。导入脚本会检查文件名和 `viewBox`，不合格就报错退出。
 3. 在上表补一行，提交，然后重新导入主题。
 4. 在浏览器里看 16px 下的效果：深浅两套配色都看一遍。
+
+## 右栏
+
+设计稿 C 是三栏：左侧边栏、中间内容、右栏（`design/mockups/c-server-first.html`、`c-topic.html`）。
+主题只提供右栏的位置、一个插件出口和面板的外观；服务器、新人进服、近期活动这些面板由插件渲染（PLAN T5b）。
+
+- **插件出口 `gtmc-right-rail`**：插件用 `api.renderInOutlet("gtmc-right-rail", 组件)` 把面板放进右栏。
+  出口参数只有 `topic`：话题页是当前话题（核心的 Topic 模型），话题列表页是 `null`。插件按它决定在哪类页面出现。
+- **在哪里出现**：
+  - 话题列表页（路由名以 `discovery.` 开头：首页、版块列表、某个版块的话题列表），视口不窄于 80rem（核心的 `xl` 断点）时。
+    `javascripts/discourse/components/gtmc-right-rail.gjs` 挂在核心的 `after-main-outlet` 出口，成为正文区网格（`#main-outlet-wrapper`）的第三栏，
+    出现时 body 带 `gtmc-has-right-rail` 类，`desktop/desktop.scss` 据此分栏。再窄的话三栏并排时话题列表不到 500px，所以不显示。
+  - 话题页：核心显示时间线时（桌面视图、视口不窄于 925px）。`gtmc-topic-rail.gjs` 挂在核心的 `topic-navigation` 出口，
+    也就是时间线所在的那一栏：帖子那一栏约 760px，再加一条独立的右栏放不下，而时间线那一栏本来就在帖子右边、宽度相当。
+    栏里从上到下是参与者、同版块话题、`gtmc-right-rail` 出口，最后是核心的时间线，当作「阅读进度」面板。
+    时间线放在最下面，是因为只有它需要在滚动时一直留在屏幕上（sticky），上面几块随页面滚走。
+  - 手机宽度不显示右栏，插件在手机上自己换形态（PLAN T5b）。
+- **宽度**：`--gtmc-right-rail-width`（300px），列表页和话题页相同，右边缘都对齐页面级的右边缘。
+- **面板外观**：外层用 `gtmc-rail-panel` 类，标题用 `h3.gtmc-rail-panel-title`（右侧可放一个 `small` 作计数），
+  空状态和失败时的一句话用 `p.gtmc-rail-panel-placeholder`。面板之间的间隔由右栏统一给出，面板自己不加外边距。
 
 ## 页脚
 

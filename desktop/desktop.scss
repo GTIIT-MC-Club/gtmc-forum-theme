@@ -34,3 +34,69 @@ body.has-sidebar-page .gtmc-footer {
     --d-main-content-gap: var(--space-4);
   }
 }
+
+// 话题列表页的右栏（gtmc-right-rail.gjs）：组件出现时给 body 加 gtmc-has-right-rail，正文区网格多分出最右一栏。
+// 网格的区域名和侧边栏那一栏照抄核心（discourse.scss 的 #main-outlet-wrapper），只在后面加一栏 rail；
+// 针对性比核心的 `body.has-sidebar-page #main-outlet-wrapper` 高一级，不靠加载顺序。
+body.gtmc-has-right-rail #main-outlet-wrapper {
+  grid-template-areas:
+    "sidebar content rail"
+    "sidebar below-content rail";
+  grid-template-columns: 0 minmax(0, 1fr) var(--gtmc-right-rail-width);
+}
+
+body.gtmc-has-right-rail.has-sidebar-page #main-outlet-wrapper {
+  grid-template-columns:
+    var(--d-sidebar-width) minmax(0, 1fr)
+    var(--gtmc-right-rail-width);
+}
+
+.gtmc-right-rail {
+  grid-area: rail;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  // 与正文区的第一行（#main-outlet 的上内边距）对齐
+  padding-top: var(--main-outlet-padding-top);
+}
+
+// 侧边栏收起时核心把网格间隙设为 0（侧边栏那一栏宽 0，间隙会让正文右移），右栏自己留出与正文的间隔
+body.gtmc-has-right-rail:not(.has-sidebar-page) .gtmc-right-rail {
+  margin-left: var(--d-main-content-gap);
+}
+
+// 话题页的右栏就是核心时间线所在的那一栏（gtmc-topic-rail.gjs）。
+// 核心让整栏 sticky；右栏比时间线高出参与者、同版块话题几块，整栏 sticky 时下半截要读到帖子末尾才露出来。
+// 改成整栏随页面滚动、只有时间线 sticky：上面几块滚走，时间线（阅读进度）一直留在屏幕上。
+// sticky 的偏移照抄核心给 .topic-navigation 的值（topic.scss）。
+// 核心的选择器是 `.container.posts .topic-navigation`，这里多一个 .with-timeline（核心渲染时间线时才有），针对性更高。
+.container.posts .topic-navigation.with-timeline {
+  position: static;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: var(--gtmc-right-rail-width);
+
+  // 核心给栏里每个子元素加 0.5em 的下边距，这里改由上面的 gap 统一间隔
+  > * {
+    margin-bottom: 0;
+  }
+
+  // 时间线即右栏里的「阅读进度」面板，外观与 .gtmc-rail-panel 相同
+  .timeline-container {
+    position: sticky;
+    top: calc(var(--header-offset, 60px) + 1.5em);
+    padding: var(--space-4);
+    border: 1px solid var(--content-border-color);
+    border-radius: var(--d-border-radius);
+  }
+}
+
+.gtmc-topic-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
