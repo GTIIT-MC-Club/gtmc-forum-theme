@@ -8,7 +8,7 @@ Discourse 主题：浅色、深色两套配色跟随系统，草方块绿强调�
 ```
 about.json              主题元数据、两套配色、像素字体的注册
 common/common.scss      手机和桌面共用：字体声明、核心 CSS 变量覆盖、Logo、按钮
-desktop/desktop.scss    仅桌面：侧边栏选中条、页面宽度固定（侧边栏收起时不变窄，开关不动）、侧边栏展开时页脚与正文对齐、右栏的分栏
+desktop/desktop.scss    仅桌面：页面宽度固定（侧边栏收起时不变窄，开关不动）、侧边栏展开时页脚与正文对齐、右栏的分栏
 （没有 mobile/：手机端目前不需要额外样式，需要时再加 mobile/mobile.scss。
  当前版本的核心不按设备二选一，而是给桌面样式表加 media="(width >= 40rem)"：视口不小于 640px 就加载，
  所以手机竖屏不受 desktop.scss 影响，但横屏的平板会加载它。）
@@ -120,6 +120,8 @@ docker cp theme app:/tmp/gtmc-theme && docker cp infra/discourse/import_theme.rb
 | 链接 | 核心的悬停色 | 不另加 | 焦点环 |
 | 侧边栏项、话题列表行 | 底色变 `--d-hover` | 底色变 `--d-selected` | 焦点环（列表行：标题链接得到焦点时环套在整行） |
 
+- **选中态**：荧光笔，即加粗加 `--gtmc-highlighter`（文字下半截一层半透明强调色），套在文字所在的行内元素上。
+  不用左边框竖条，不用整行底色（`AGENTS.md`「界面规则」）。侧边栏当前所在的条目就是这样，图标同时换成强调色。
 - **方块下沿**：实心按钮底部 `--gtmc-block-edge-height` 的深色内阴影，像方块的立体边。只给实心按钮，扁平按钮没有底色，加了会像一道划痕。
 - **焦点环**：`--gtmc-focus-ring-width` 粗的 `--tertiary` 描边，外移 `--gtmc-focus-ring-offset`。核心让大多数控件的键盘焦点和悬停长得一样，
   键盘用户分不清焦点在哪，所以这里统一加环。`--tertiary` 对两套配色的页面底色都超过 3:1（WCAG 非文字对比度）。

@@ -1,12 +1,5 @@
 // 仅桌面端的样式。
 
-// 当前所在的侧边栏条目：左侧一条强调色竖线。核心没有给这条线留变量，所以只能选核心的类；
-// 核心改了 .sidebar-section-link 的类名这条线会消失，但不影响功能。
-// 3px 与 common.scss 里加粗到约 3px 的导航下划线同一量级，能看见又不挤占链接文字的左边距。
-.sidebar-section-link.active {
-  box-shadow: inset 3px 0 0 var(--tertiary);
-}
-
 // 页面级边缘：页头、正文区、页脚（都是核心的 .wrap）始终取侧边栏展开时的宽度，侧边栏收起时也不变窄。
 // 原因：核心只在侧边栏展开时用 `body.has-sidebar-page .wrap` 加宽 .wrap，收起时变回 --d-max-width，
 // 居中的页头和正文整体平移（1440px 宽时侧边栏开关从 x=56 跳到 x=176），正文左边缘也不再和开关、Logo 对齐。

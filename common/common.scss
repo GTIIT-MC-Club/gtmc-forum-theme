@@ -39,9 +39,14 @@
   --d-topic-list-header-data-padding-y: var(--space-2);
   --d-topic-list-title-font-size: var(--font-0);
 
-  // 侧边栏选中项用配色方案的「选中」底色，不用核心默认的灰阶
-  --d-sidebar-active-background: var(--d-selected);
-  --d-sidebar-active-color: var(--primary);
+  // 选中态一律用「荧光笔」：加粗，文字下半截涂一层半透明强调色（AGENTS.md「界面规则」）。
+  // 比例取自设计稿 c-server-first.html：从 62% 高度往下涂，强调色 35% 不透明，正好压在字的下半截，不盖住笔画。
+  // 别处的选中态（插件里的也一样）用 `background: var(--gtmc-highlighter)` 套在文字所在的行内元素上。
+  --gtmc-highlighter: linear-gradient(
+    transparent 62%,
+    color-mix(in srgb, var(--tertiary) 35%, transparent) 62%
+  );
+
 
   // 核心的 text-accent 令牌由 tertiary 的派生色算出，绿色强调色下对比度不足 AA，直接用 tertiary
   --token-color-text-accent: var(--tertiary);
@@ -318,4 +323,23 @@ a:focus-visible,
 
 .gtmc-same-category-topic-age {
   color: var(--primary-medium);
+}
+
+// 侧边栏当前所在的条目：不要核心的整行底色，加粗、文字套荧光笔，图标换成强调色（设计稿 c-server-first.html）。
+// 文字所在的 span 宽度只到文字末尾（核心给它 flex: 0 1 auto），荧光笔不会拉满整行。
+// 三个变量写在条目自己身上而不是 :root：核心的「upcoming change」（body 上的 uc-modernize-foundation-theme 类）
+// 在 body 上重新定义了它们，:root 上的值传不下来。
+// 版块条目的图标颜色是核心写在元素上的行内样式（版块颜色），压不过，也不该压：版块颜色是识别版块用的。
+.sidebar-section-link.active {
+  --d-sidebar-active-background: transparent;
+  --d-sidebar-active-color: var(--primary);
+  --d-sidebar-active-font-weight: bold;
+
+  .sidebar-section-link-content-text {
+    background: var(--gtmc-highlighter);
+  }
+
+  .sidebar-section-link-prefix.icon {
+    color: var(--tertiary);
+  }
 }
