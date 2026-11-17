@@ -59,7 +59,8 @@
   --gtmc-focus-ring-offset: 2px;
 
   // 核心按钮的过渡默认是 none，它把这个变量整个写进 transition 属性，所以这里逐个列出属性，不用 all
-  --d-button-transition: background-color var(--gtmc-state-transition-duration),
+  --d-button-transition:
+    background-color var(--gtmc-state-transition-duration),
     color var(--gtmc-state-transition-duration),
     border-color var(--gtmc-state-transition-duration),
     box-shadow var(--gtmc-state-transition-duration),
