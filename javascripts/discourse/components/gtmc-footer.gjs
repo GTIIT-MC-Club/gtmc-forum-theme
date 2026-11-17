@@ -27,7 +27,7 @@ export default class GtmcFooter extends Component {
   <template>
     {{! 核心在列表或话题读到底之前把 showFooter 置为 false，否则无限滚动时页脚会夹在列表中间 }}
     {{#if @outletArgs.showFooter}}
-      <footer class="gtmc-footer">
+      <footer class="gtmc-footer wrap">
         <div class="gtmc-footer-content">
           <div class="gtmc-footer-about">
             <span class="gtmc-footer-club-name">

@@ -1,41 +1,27 @@
 // 仅桌面端的样式。
 
-// 话题页标题。手机端不加载本文件，标题保持系统字体。
-#topic-title .fancy-title {
-  font-family: var(--gtmc-font-pixel);
-  font-size: var(--gtmc-pixel-size-title);
-  font-weight: normal; // 同 #site-text-logo
-  line-height: 1.3;
-}
-
-// 侧边栏分组标题（「分类」「标签」等）用 12px 像素体，和正文的链接行拉开层次
-.sidebar-section-header-text {
-  font-family: var(--gtmc-font-pixel);
-  font-size: var(--gtmc-pixel-size-label);
-}
-
 // 当前所在的侧边栏条目：左侧一条强调色竖线。核心没有给这条线留变量，所以只能选核心的类；
 // 核心改了 .sidebar-section-link 的类名这条线会消失，但不影响功能。
-// 3px 与上面的 2px 下划线加粗同一量级，能看见又不挤占链接文字的左边距。
+// 3px 与 common.scss 里加粗到约 3px 的导航下划线同一量级，能看见又不挤占链接文字的左边距。
 .sidebar-section-link.active {
   box-shadow: inset 3px 0 0 var(--tertiary);
 }
 
-// 页头内容区固定按「有侧边栏」的宽度排版，让左上角的侧边栏开关在展开、收起侧边栏时不左右移动。
-// 原因：页头和正文共用核心的 .wrap（max-width: --d-max-width，水平居中）；核心在侧边栏展开时用
-// `body.has-sidebar-page .wrap` 把它加宽一个 --d-sidebar-width，收起时又变回去，居中的页头随之整体平移
-// （1440px 宽时开关从 x=56 跳到 x=176），核心还给这段宽度变化加了过渡动画。
-// 这里只改页头，正文仍跟随侧边栏变宽变窄。选择器比核心的 .wrap 多一级 .d-header，才能在侧边栏收起时压过它；
-// 展开时核心规则给出的值和这里相同，不冲突。
-// 手机宽度不加载本文件（样式表带 media="(width >= 40rem)"），而且手机视图没有这个开关，行为不变。
-.d-header > .wrap {
+// 页面级边缘：页头、正文区、页脚（都是核心的 .wrap）始终取侧边栏展开时的宽度，侧边栏收起时也不变窄。
+// 原因：核心只在侧边栏展开时用 `body.has-sidebar-page .wrap` 加宽 .wrap，收起时变回 --d-max-width，
+// 居中的页头和正文整体平移（1440px 宽时侧边栏开关从 x=56 跳到 x=176），正文左边缘也不再和开关、Logo 对齐。
+// 固定宽度后，收起侧边栏时正文向左占满让出的位置，开关不动，三者共用同一对左右边缘。
+// 与核心 `.wrap` 的针对性相同，靠主题样式表在核心之后加载取胜；侧边栏展开时核心给出的值和这里相同，不冲突。
+// 公式必须写在这里而不能存成 :root 上的变量：核心只在内层元素上把 --d-sidebar-width 设成 15em，
+// :root 上仍是 17em，在 :root 算好的值会宽出 32px，收起侧边栏时开关就会左移。
+// 手机宽度不加载本文件（样式表带 media="(width >= 40rem)"），手机上 .wrap 本来就占满屏宽。
+.wrap {
   max-width: calc(var(--d-sidebar-width) + var(--d-max-width));
 }
 
-// 页脚跟着正文对齐：侧边栏展开时核心把正文区加宽一个侧边栏宽度，再让出左边一栏（侧边栏）加一个间隙。
-// 页脚在侧边栏的网格之外（出口 below-footer），得自己照核心 `body.has-sidebar-page .wrap` 的做法加宽并让出左边。
+// 页脚跟着正文对齐：侧边栏展开时正文区的网格让出左边一栏（侧边栏）加一个间隙。
+// 页脚在那个网格之外（出口 below-footer），得自己让出同样的宽度。
 body.has-sidebar-page .gtmc-footer {
-  max-width: calc(var(--d-sidebar-width) + var(--d-max-width));
   padding-left: calc(
     var(--d-wrap-padding-x) + var(--d-sidebar-width) + var(--d-main-content-gap)
   );

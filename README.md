@@ -1,6 +1,6 @@
 # GTMC 论坛主题
 
-Discourse 主题：浅色、深色两套配色跟随系统，草方块绿强调色，圆角收小、边框硬朗；Logo 文字和少数标题用开源像素字体，**正文用系统字体**。
+Discourse 主题：浅色、深色两套配色跟随系统，草方块绿强调色，圆角收小、边框硬朗；**只有 Logo 文字用开源像素字体**，其余一律系统字体。
 不使用 Mojang 的任何素材，不复刻 Linux.do 的视觉稿。
 
 ## 目录
@@ -8,8 +8,8 @@ Discourse 主题：浅色、深色两套配色跟随系统，草方块绿强调�
 ```
 about.json              主题元数据、两套配色、像素字体的注册
 common/common.scss      手机和桌面共用：字体声明、核心 CSS 变量覆盖、Logo、按钮
-desktop/desktop.scss    仅桌面：话题页标题、侧边栏分组标题与选中条、页头宽度固定（侧边栏开关不随侧边栏移动）、侧边栏展开时页脚与正文对齐
-（没有 mobile/：手机端目前不需要额外样式，话题页标题因此保持正文字体；需要时再加 mobile/mobile.scss。
+desktop/desktop.scss    仅桌面：侧边栏选中条、页面宽度固定（侧边栏收起时不变窄，开关不动）、侧边栏展开时页脚与正文对齐
+（没有 mobile/：手机端目前不需要额外样式，需要时再加 mobile/mobile.scss。
  当前版本的核心不按设备二选一，而是给桌面样式表加 media="(width >= 40rem)"：视口不小于 640px 就加载，
  所以手机竖屏不受 desktop.scss 影响，但横屏的平板会加载它。）
 javascripts/            页脚组件（Glimmer）和挂载它的 api-initializer，见「页脚」
@@ -76,6 +76,62 @@ docker cp theme app:/tmp/gtmc-theme && docker cp infra/discourse/import_theme.rb
 达不到 WCAG AA 的 4.5:1。深色方案把次要文字略微提亮，是为了在列表行底色上也留出余量。
 改动配色后，用相同的推算公式重新验算（公式来自核心的 `color_transformations.scss` 和 `dark-light-diff`）。
 
+## 视觉规范
+
+改样式之前先对照这一节；新规则和这里冲突时，要么改规则，要么先改这一节并说明原因。
+借鉴的是 Linux.do 的手感（布局、间距、交互反馈），不是它的配色和视觉稿。下面的 `--gtmc-*` 变量都定义在 `common/common.scss` 的 `:root`；
+依赖核心在内层元素上才改写的变量（如 `--d-sidebar-width`）的宽度不要存成 `:root` 变量，直接写在用到的规则里。
+
+### 布局：两级边缘
+
+- **页面级**：页头、正文区、页脚共用同一对左右边缘，即核心 `.wrap` 的宽度。桌面端这个宽度固定为
+  侧边栏宽 + 核心的 `--d-max-width`，**侧边栏收起时也不变窄**：
+  收起后正文向左占满侧边栏让出的位置，所以页头左上角的开关、Logo 和正文左边缘始终在同一条线上，开关也不会移动（T3 的验收要求）。
+- **侧边栏**是正文区网格的第一栏，与正文之间隔核心的 `--d-main-content-gap`；它不改变页面级边缘。
+- **话题级**：话题页里的标题、帖子、帖子下的按钮行、「推荐话题」列表共用一个栏宽
+  （核心算帖子宽度的同一个公式：头像宽 + 正文宽 + 两倍内边距，约 760px），左边缘就是页面级的左边缘。
+  时间线在这一栏右侧，占用余下的宽度。不要为了「填满」去加宽正文：一行超过约 40 个汉字就难读了。
+- 手机宽度下以上区块都占满屏宽，只留核心的 `--d-wrap-padding-x` 边距。
+
+### 字体与字号
+
+- **像素字体只用于 Logo 文字**（`#site-text-logo`）。话题标题是用户内容，侧边栏、按钮、表单都是界面，一律用系统字体；
+  像素字体和系统字体在同一块区域里混排会像两个产品拼在一起。
+- 字号只用核心的几档变量，不写 px：
+
+  | 层级 | 变量 | 用在 |
+  |---|---|---|
+  | 页面标题 | 核心默认（话题标题、版块名） | 不在主题里改 |
+  | 区块标题 | 核心默认（`--font-up-1` 一档） | 话题页下方「新话题和未读话题」这类列表标题 |
+  | 正文 | `--font-0` | 帖子、列表标题行、按钮、「想阅读更多？」这类提示句 |
+  | 次要 / 元信息 | `--font-down-1`，颜色 `--primary-medium` | 时间、计数、页脚 |
+  | 声明 | `--font-down-2` | 页脚的商标声明，只此一处 |
+
+- 强调靠字重和颜色，不靠放大字号；一屏之内的粗体只给标题和名字。
+
+### 交互状态
+
+所有能点的东西用同一套反馈，时长都取 `--gtmc-state-transition-duration`（120ms：快到感觉不到延迟，又能让颜色变化不生硬）。
+
+| 控件 | 悬停 | 按下 | 键盘焦点 |
+|---|---|---|---|
+| 实心按钮（主、默认、危险、成功） | 核心的悬停色 | 方块下沿消失，整体下移 `--gtmc-pressed-offset` | 焦点环 |
+| 扁平 / 图标按钮 | 底色变 `--d-hover` | 底色变 `--d-selected` | 焦点环 |
+| 链接 | 核心的悬停色 | 不另加 | 焦点环 |
+| 侧边栏项、话题列表行 | 底色变 `--d-hover` | 底色变 `--d-selected` | 焦点环（列表行：标题链接得到焦点时环套在整行） |
+
+- **方块下沿**：实心按钮底部 `--gtmc-block-edge-height` 的深色内阴影，像方块的立体边。只给实心按钮，扁平按钮没有底色，加了会像一道划痕。
+- **焦点环**：`--gtmc-focus-ring-width` 粗的 `--tertiary` 描边，外移 `--gtmc-focus-ring-offset`。核心让大多数控件的键盘焦点和悬停长得一样，
+  键盘用户分不清焦点在哪，所以这里统一加环。`--tertiary` 对两套配色的页面底色都超过 3:1（WCAG 非文字对比度）。
+  只用 `:focus-visible`，鼠标点击不出环。
+- **减少动态效果**：系统开了「减少动态效果」（`prefers-reduced-motion: reduce`）时过渡时长为 0，按下时不位移。
+- **不可点的东西没有悬停效果**。首页的服务器状态卡片是信息块不是链接，只和全站统一边框和圆角；卡片里的复制按钮和地图链接按上表走。
+
+### 边框与间距
+
+- 区块边框：`1px solid var(--content-border-color)`，圆角 `--d-border-radius`（主题收到 2px）。状态色条、页脚分隔线之类的强调边另算，宽度写成具名变量。
+- 间距只用核心的 `--space-1` 到 `--space-12`（4px 一档），不写 px、em。
+
 ## 像素字体
 
 - 字体：[Fusion Pixel Font](https://github.com/TakWolf/fusion-pixel-font)，SIL OFL 1.1，许可全文在 `fonts/OFL.txt`；
@@ -93,9 +149,8 @@ docker cp theme app:/tmp/gtmc-theme && docker cp infra/discourse/import_theme.rb
 
 ### 用在哪里
 
-只用在 Logo 文字、桌面端的话题页标题、侧边栏分组标题，**不用在**话题列表、帖子正文、表单和管理后台，
-这些地方要紧凑、要看得清。字号只取 12px 的整数倍（24px、12px），原因见 `common/common.scss`。
-要扩大使用范围，先在真机上看过非整数倍字号的效果再决定。
+只用在 Logo 文字（`#site-text-logo`），字号 24px，是 12px 的整数倍，原因见 `common/common.scss`。
+话题标题、侧边栏、按钮、表单都用系统字体，见「视觉规范 · 字体与字号」。要扩大使用范围，先改那一节并说明理由。
 
 ### 重新生成子集
 
@@ -192,7 +247,7 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
     地址带数据库 id（`/c/<名字>/<id>`、`/t/<名字>/<id>`），每个站点不同，所以不能写死在主题里。
     **不要在后台手改**，重跑 `sidebar.rb` 会改回来。
 - **样式**：在 `common/common.scss`，只用 CSS 变量，类名以 `gtmc-footer` 开头；手机宽度下链接自动换行。
-  页脚在侧边栏所在的网格之外，侧边栏展开时由 `desktop/desktop.scss` 让它跟正文一样加宽并让出左边一栏，否则会比正文偏左。
+  页脚外层带核心的 `.wrap` 类，宽度和左右边缘与页头、正文一致；它在侧边栏所在的网格之外，侧边栏展开时由 `desktop/desktop.scss` 让出左边一栏，否则会比正文偏左。
 - **商标声明**：Minecraft 是 Mojang Synergies AB 的商标；本站是学生社团自办，与 Mojang、Microsoft 无关。
   这句话要保留，文字改动前先和负责人确认。
 
@@ -201,7 +256,8 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 下面这些还**没有逐项在运行中的站上核对过**（只做了静态检查，或只对照过核心源码）：
 
 - 桌面和手机宽度下，首页、话题页、发帖框、用户页、管理后台有没有错位或看不清的文字。
-- `#site-text-logo`、`#topic-title .fancy-title`、`.sidebar-section-header-text`、`.sidebar-section-link.active`
+- `#site-text-logo`、`.sidebar-section-link.active`
   这几个核心选择器在当前 Discourse 版本里是否仍然命中（只对照过 `discourse/discourse` 主分支的源码，没有对着运行中的实例看过）。
 - 像素字体是否被 Discourse 正确上传并通过 `$gtmc-pixel-font` 注入（浏览器开发者工具里看 `@font-face` 的 `src` 是否是 `/uploads/...`）。
-- 手机端 24px 的 Logo 文字在页头里是否放得下；放不下就新增 `mobile/mobile.scss` 把 `--gtmc-pixel-size-title` 调小。
+- 压缩包导入是否把 `about.json` 的两套配色、字体资源都建出来。
+- 手机端 24px 的 Logo 文字在页头里是否放得下；放不下就新增 `mobile/mobile.scss` 把 `--gtmc-logo-font-size` 调小。
