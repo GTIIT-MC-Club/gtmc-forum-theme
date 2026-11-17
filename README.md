@@ -1,6 +1,6 @@
 # GTMC 论坛主题
 
-Discourse 主题：深色优先，草方块绿强调色，圆角收小、边框硬朗；Logo 文字和少数标题用开源像素字体，**正文用系统字体**。
+Discourse 主题：深色优先，草方块绿强调色，圆角收小、边框硬朗；**只有 Logo 文字用开源像素字体**，其余一律系统字体。
 不使用 Mojang 的任何素材，不复刻 Linux.do 的视觉稿。
 
 ## 目录
@@ -8,8 +8,8 @@ Discourse 主题：深色优先，草方块绿强调色，圆角收小、边框�
 ```
 about.json              主题元数据、两套配色、像素字体的注册
 common/common.scss      手机和桌面共用：字体声明、核心 CSS 变量覆盖、Logo、按钮
-desktop/desktop.scss    仅桌面：话题页标题、侧边栏分组标题与选中条、页面宽度固定（侧边栏收起时不变窄，开关不动）、侧边栏展开时页脚与正文对齐
-（没有 mobile/：手机端目前不需要额外样式，话题页标题因此保持正文字体；需要时再加 mobile/mobile.scss。
+desktop/desktop.scss    仅桌面：侧边栏选中条、页面宽度固定（侧边栏收起时不变窄，开关不动）、侧边栏展开时页脚与正文对齐
+（没有 mobile/：手机端目前不需要额外样式，需要时再加 mobile/mobile.scss。
  当前版本的核心不按设备二选一，而是给桌面样式表加 media="(width >= 40rem)"：视口不小于 640px 就加载，
  所以手机竖屏不受 desktop.scss 影响，但横屏的平板会加载它。）
 javascripts/            页脚组件（Glimmer）和挂载它的 api-initializer，见「页脚」
@@ -141,9 +141,8 @@ cd theme && zip -r ../gtmc-theme.zip about.json assets common desktop javascript
 
 ### 用在哪里
 
-只用在 Logo 文字、桌面端的话题页标题、侧边栏分组标题，**不用在**话题列表、帖子正文、表单和管理后台，
-这些地方要紧凑、要看得清。字号只取 12px 的整数倍（24px、12px），原因见 `common/common.scss`。
-要扩大使用范围，先在真机上看过非整数倍字号的效果再决定。
+只用在 Logo 文字（`#site-text-logo`），字号 24px，是 12px 的整数倍，原因见 `common/common.scss`。
+话题标题、侧边栏、按钮、表单都用系统字体，见「视觉规范 · 字体与字号」。要扩大使用范围，先改那一节并说明理由。
 
 ### 重新生成子集
 
@@ -249,8 +248,8 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 没有测试站，下面这些**只做了静态检查**，需要在真站上看：
 
 - 桌面和手机宽度下，首页、话题页、发帖框、用户页、管理后台有没有错位或看不清的文字。
-- `#site-text-logo`、`#topic-title .fancy-title`、`.sidebar-section-header-text`、`.sidebar-section-link.active`
+- `#site-text-logo`、`.sidebar-section-link.active`
   这几个核心选择器在当前 Discourse 版本里是否仍然命中（只对照过 `discourse/discourse` 主分支的源码，没有对着运行中的实例看过）。
 - 像素字体是否被 Discourse 正确上传并通过 `$gtmc-pixel-font` 注入（浏览器开发者工具里看 `@font-face` 的 `src` 是否是 `/uploads/...`）。
 - 压缩包导入是否把 `about.json` 的两套配色、字体资源都建出来。
-- 手机端 24px 的 Logo 文字在页头里是否放得下；放不下就新增 `mobile/mobile.scss` 把 `--gtmc-pixel-size-title` 调小。
+- 手机端 24px 的 Logo 文字在页头里是否放得下；放不下就新增 `mobile/mobile.scss` 把 `--gtmc-logo-font-size` 调小。

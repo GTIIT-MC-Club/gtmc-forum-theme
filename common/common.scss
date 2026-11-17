@@ -1,6 +1,7 @@
 // 手机和桌面共用的样式。颜色一律来自配色方案（about.json 的 color_schemes），这里只用变量。
 
-// 像素字体只用于 Logo 文字和少数标题（见 README「像素字体用在哪里」），不用于正文。
+// 像素字体只用于 Logo 文字（见 README「视觉规范 · 字体与字号」）：标题、侧边栏、按钮都用系统字体，
+// 两种字体在同一块区域里混排会像两个产品拼在一起。
 // 字体来自 Fusion Pixel 12px 的子集，字形按 12px 网格绘制；
 // 字号取 12px 的整数倍才能让每个像素格对应整数个屏幕像素，否则边缘发虚。
 // $gtmc-pixel-font 由 about.json 的 assets 注入，值是上传后文件的 URL。
@@ -11,9 +12,8 @@
 }
 
 :root {
-  // 字号取 12px 的整数倍（原因见上）；桌面端的话题标题、侧边栏标题也引用这两个变量
-  --gtmc-pixel-size-title: 24px;
-  --gtmc-pixel-size-label: 12px;
+  // Logo 文字的字号，取 12px 的整数倍（原因见上）
+  --gtmc-logo-font-size: 24px;
 
   // 子集之外的字（生僻字、emoji）回落到站点正文字体，而不是浏览器默认的衬线体
   --gtmc-font-pixel: "GTMC Pixel", var(--font-family);
@@ -54,11 +54,19 @@
   );
 }
 
+// 推荐话题下面的「想阅读更多？请浏览……」是一句提示，核心用 h3 渲染（约 18.7px 粗体），比上面的列表标题还显眼。
+// 按 README 的字号层级降为正文字号、常规字重、次要文字色；里面的版块和链接保持各自的颜色。
+.more-topics__browse-more {
+  color: var(--primary-medium);
+  font-size: var(--font-0);
+  font-weight: normal;
+}
+
 // 核心用 `.d-header #site-text-logo` 设了 font-size（--font-up-3，约 24.25px），只写 #site-text-logo 压不过它；
 // 非 12px 整数倍的字号会让像素笔画发糊，所以这里跟核心用同样的针对性。
 .d-header #site-text-logo {
   font-family: var(--gtmc-font-pixel);
-  font-size: var(--gtmc-pixel-size-title);
+  font-size: var(--gtmc-logo-font-size);
   font-weight: normal; // 像素字体没有粗体，浏览器合成的粗体会让笔画糊在一起
   line-height: 1;
 }
