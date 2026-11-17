@@ -383,3 +383,37 @@ a:focus-visible,
     color: var(--tertiary);
   }
 }
+
+// 全局提示的提示层（lib/gtmc-global-tooltip.js）。深底浅字、系统字体，与核心 DTooltip 改过的外观一致（见下一条）。
+// 位置由脚本写进 left/top；淡入用状态时长，延迟由脚本按 --gtmc-tooltip-delay 计时，这里不再加 transition-delay。
+// 提示层里的字永远是系统字体：它可能出现在关了抗锯齿的像素字体元素旁边，这里显式恢复抗锯齿。
+// 最大宽度：一行约 20 个汉字就换行，再长的说明不该塞进提示里；窄屏上不超过视口的 70%。
+.gtmc-tooltip-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: z("max");
+  box-sizing: border-box;
+  max-width: min(20em, 70vw);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--d-border-radius);
+  background: var(--primary);
+  color: var(--secondary);
+  font-family: var(--font-family);
+  font-size: var(--font-down-1);
+  -webkit-font-smoothing: auto;
+  line-height: var(--line-height-medium);
+  white-space: pre-line;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--gtmc-duration-state) var(--gtmc-ease);
+
+  &.open {
+    opacity: 1;
+  }
+
+  // 同组内换控件：只换内容，不重新淡入
+  &.instant {
+    transition: none;
+  }
+}

@@ -12,7 +12,8 @@ desktop/desktop.scss    仅桌面：页面宽度固定（侧边栏收起时不�
 （没有 mobile/：手机端目前不需要额外样式，需要时再加 mobile/mobile.scss。
  当前版本的核心不按设备二选一，而是给桌面样式表加 media="(width >= 40rem)"：视口不小于 640px 就加载，
  所以手机竖屏不受 desktop.scss 影响，但横屏的平板会加载它。）
-javascripts/            页脚、右栏的组件（Glimmer）和挂载它们的 api-initializer，见「页脚」「右栏」
+javascripts/            页脚、右栏、置顶标签、全局提示的组件（Glimmer）和挂载它们的 api-initializer，见「页脚」「右栏」「全局提示」
+test/                   QUnit 测试，随主题上传，见「全局提示 · 测试」
 locales/                主题描述、设置项说明（theme_metadata）和页脚的界面文字（中英文）
 settings.yml            主题设置：Discord 邀请链接和页脚的两个站内链接，见「页脚」
 assets/                 子集化后的像素字体（woff2）
@@ -281,6 +282,30 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 - **宽度**：`--gtmc-right-rail-width`（300px），列表页和话题页相同，右边缘都对齐页面级的右边缘。
 - **面板外观**：外层用 `gtmc-rail-panel` 类，标题用 `h3.gtmc-rail-panel-title`（右侧可放一个 `small` 作计数），
   空状态和失败时的一句话用 `p.gtmc-rail-panel-placeholder`。面板之间的间隔由右栏统一给出，面板自己不加外边距。
+
+## 全局提示
+
+说明性的文字不常驻页面（`AGENTS.md`「界面规则」）：图标、人数、版本号这类元素的说明写在 `data-tooltip` 里，鼠标停留或键盘聚焦时才出现。
+主题和插件的元素都这样写，不用各自包提示组件：
+
+```hbs
+<button class="btn-flat" aria-label={{this.copyLabel}} data-tooltip={{this.copyLabel}}>{{dIcon "gtmc-copy"}}</button>
+```
+
+- **行为**（`javascripts/discourse/lib/gtmc-global-tooltip.js`，移植自负责人的 OpenCard 项目）：
+  默认贴着鼠标并跟随；键盘聚焦时立即出现，锚定在控件上；鼠标第一次停留等 `--gtmc-tooltip-delay`（400ms）再淡入；
+  放不下时翻到对侧（锚定控件时先对侧、再另一轴，贴鼠标时左右、上下各自翻），始终完整留在视口里；点击、Esc、移开即收起。
+  触屏上点按不出提示。
+- **可选属性**（写在元素或祖先上，就近生效）：
+  - `data-tooltip-anchor="target"`：锚定在控件上而不是贴鼠标。
+  - `data-tooltip-placement="top|bottom|left|right"`：锚定时画在哪一侧，默认 `bottom`。水平排列的控件不要用 `left`/`right`，会盖住相邻的控件。
+  - `data-tooltip-group`（写在容器上）：容器里相邻的控件共用「热窗口」，第一次等延迟，之后在组内换控件立即换内容、不再淡入；离开容器就收起。
+  - `data-tooltip-overflow`：只在文字被截断（省略号）时才提示，用于可能放不下的名字。
+- **不要**：有常驻可见文字的控件不再重复同样的提示；只有图标的按钮除了 `data-tooltip` 还要有 `aria-label`，读屏软件不读提示层。
+- **结构**：提示层是 `components/gtmc-tooltip-layer.gjs`（挂在 `below-footer` 出口，全站一个），行为在 `lib/gtmc-global-tooltip.js`。
+  后者是全站唯一直接操作 DOM 的代码（文档级事件监听、按实时几何位置摆放），这是 `AGENTS.md` 的例外条款，别的地方不要再这样写。
+- **测试**：`test/unit/lib/gtmc-global-tooltip-test.js`，在 Discourse 源码目录对着运行中的开发站执行
+  `QUNIT_RAILS_ENV=development bin/qunit --theme-name GTMC --qunit-path /theme-qunit`（主题要先导入，测试文件随主题上传）。
 
 ## 页脚
 
