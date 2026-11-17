@@ -304,6 +304,8 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 - **不要**：有常驻可见文字的控件不再重复同样的提示；只有图标的按钮除了 `data-tooltip` 还要有 `aria-label`，读屏软件不读提示层。
 - **结构**：提示层是 `components/gtmc-tooltip-layer.gjs`（挂在 `below-footer` 出口，全站一个），行为在 `lib/gtmc-global-tooltip.js`。
   后者是全站唯一直接操作 DOM 的代码（文档级事件监听、按实时几何位置摆放），这是 `AGENTS.md` 的例外条款，别的地方不要再这样写。
+- **核心的 DTooltip**（float-kit，核心和插件里用组件写的提示）行为不改，`common/common.scss` 只把外观改成与全局提示一致：
+  深底浅字、系统字体、主题圆角、箭头同色、淡入用动效令牌。
 - **测试**：`test/unit/lib/gtmc-global-tooltip-test.js`，在 Discourse 源码目录对着运行中的开发站执行
   `QUNIT_RAILS_ENV=development bin/qunit --theme-name GTMC --qunit-path /theme-qunit`（主题要先导入，测试文件随主题上传）。
 

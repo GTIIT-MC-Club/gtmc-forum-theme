@@ -417,3 +417,36 @@ a:focus-visible,
     transition: none;
   }
 }
+
+// 核心的 DTooltip（float-kit，例如帖子下的按钮、时间线上的提示）只改外观，与全局提示一致：深底浅字、系统字体、
+// 主题圆角、动效令牌；行为、位置计算不动。选择器与核心 d-tooltip.scss 的同一层级，靠主题样式表后加载取胜。
+// 用户引导气泡（user tip）也用这个元素，核心用针对性更高的 [data-content][data-identifier="user-tip"] 给它强调色底，不受影响。
+.fk-d-tooltip__content {
+  // 箭头是核心注入的 SVG，两条路径分别取这两个变量；跟着底色一起换，否则深底上挂一个浅色箭头
+  --float-kit-arrow-stroke-color: var(--primary);
+  --float-kit-arrow-fill-color: var(--primary);
+
+  border: none;
+  border-radius: var(--d-border-radius);
+  background-color: var(--primary);
+  box-shadow: none;
+  color: var(--secondary);
+  font-family: var(--font-family);
+  font-size: var(--font-down-1);
+  -webkit-font-smoothing: auto;
+
+  &.-animated {
+    animation-duration: var(--gtmc-duration-state);
+    animation-timing-function: var(--gtmc-ease);
+  }
+
+  // 提示里偶尔有链接（如「谁点了赞」），深底上的强调色对比度不够，改用正文同色加下划线
+  a {
+    color: inherit;
+    text-decoration: underline;
+  }
+}
+
+.fk-d-tooltip__inner-content {
+  padding: var(--space-1) var(--space-2);
+}
