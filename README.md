@@ -15,7 +15,8 @@ desktop/desktop.scss    仅桌面：侧边栏选中条、页面宽度固定（�
 javascripts/            页脚组件（Glimmer）和挂载它的 api-initializer，见「页脚」
 locales/                主题描述、设置项说明（theme_metadata）和页脚的界面文字（中英文）
 settings.yml            主题设置：Discord 邀请链接和页脚的两个站内链接，见「页脚」
-assets/                 子集化后的像素字体（woff2）、像素图标精灵 gtmc-icons.svg（直接编辑，见「图标」）
+assets/                 子集化后的像素字体（woff2）
+icons/                  像素图标，一个图标一个 .svg 文件，文件名就是图标名，见「图标」
 fonts/                  字体的许可文件、子集字符表（不随主题上传时也要保留，见下）
 ```
 
@@ -42,7 +43,8 @@ docker cp theme app:/tmp/gtmc-theme && docker cp infra/discourse/import_theme.rb
     bundle exec rails runner /tmp/import_theme.rb /tmp/gtmc-theme
 ```
 
-脚本把 `theme/` 里除 `fonts/`、`README.md` 以外的文件打成压缩包（这两项只给仓库读者看），已有 GTMC 主题就原地更新，没有就新建；
+脚本把 `theme/` 里除 `fonts/`、`icons/`、`README.md` 以外的文件打成压缩包（`fonts/` 和 README 只给仓库读者看），
+并把 `icons/` 里的图标拼成一个图标精灵一起打进去，已有 GTMC 主题就原地更新，没有就新建；
 导入后检查主题的样式和模板有没有编译错误，有就报错退出。改了主题后重跑即可，可重复执行；
 后台里设过的主题设置（如 `discord_invite_url`）不会被覆盖。
 
@@ -188,16 +190,17 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 
 ## 图标
 
-`assets/gtmc-icons.svg` 是本站的自定义图标精灵，在 `about.json` 里以 `icons-sprite` 这个名字注册
-（核心 `lib/svg_sprite.rb` 只认这个名字），精灵里每个 `<symbol>` 的 `id` 就是图标名，
+`icons/` 里一个图标一个 `.svg` 文件，文件名（不含 `.svg`）就是图标名。Discourse 每个主题只认一个图标精灵
+（核心 `lib/svg_sprite.rb` 的 `icons-sprite`），所以 `infra/discourse/import_theme.rb` 在打包时把它们拼成
+`assets/gtmc-icons.svg`（只存在于压缩包里，仓库里没有这个文件），
 导入主题后可以在任何填图标名的地方使用：版块的图标样式、侧边栏链接、`dIcon`。
 
 - **来源**：全部由本仓库从零绘制，原创，随主题同许可发布。**没有**描摹、取色或参照 Minecraft 原版贴图和图标（PLAN 第 0 节非目标），
   只取告示牌、蛋糕、砖墙这类通用题材。新增图标也必须遵守这一条。
 - **规格**：16×16 网格、整数坐标、单色 `fill="currentColor"`、`shape-rendering="crispEdges"`。
   单色是为了让图标跟着所在位置的文字颜色走：侧边栏和版块徽章里取版块颜色，深浅两套配色下都不用另画。
-- **文件**：`assets/gtmc-icons.svg` 就是源文件，没有生成步骤。每个图标是一行 `<symbol>`，`viewBox="0 0 16 16"`，
-  里面一个 `<path>`，每个像素是一个 1×1 的矩形。
+- **文件**：`icons/gtmc-<英文名>.svg`，普通的独立 SVG，必须有 `viewBox`。打包时颜色会被统一换成 `currentColor`，
+  所以画的时候用什么颜色都行，但只能是单色剪影。
 
 | 图标 | 用在 |
 |---|---|
@@ -227,8 +230,7 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 
 1. 用任何能导出 SVG 的工具在 16×16 画布上画（Inkscape、Figma 都行；像素画工具导出的 SVG 也可以）。
    轮廓留 1 格边距，线条至少 1 格、细节之间至少隔 1 格，否则 16px 下糊成一团。名字用 `gtmc-` 开头，免得和核心或插件的图标重名。
-2. 从导出的 SVG 里只取图形（`<path>` 或 `<rect>`），去掉颜色，改成 `fill="currentColor"`，加上 `shape-rendering="crispEdges"`，
-   包进 `<symbol id="gtmc-<英文名>" viewBox="0 0 16 16">…</symbol>`，放进 `assets/gtmc-icons.svg`。改已有图标就替换那一行。
+2. 存成 `icons/gtmc-<英文名>.svg`（改已有图标就直接覆盖那个文件）。导入脚本会检查文件名和 `viewBox`，不合格就报错退出。
 3. 在上表补一行，提交，然后重新导入主题。
 4. 在浏览器里看 16px 下的效果：深浅两套配色都看一遍。
 
