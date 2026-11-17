@@ -42,6 +42,18 @@
   --token-color-text-accent-bolder: var(--tertiary);
 }
 
+// 话题级栏宽（README「视觉规范 · 布局」）：标题、帖子、按钮行、推荐话题共用一栏。
+// 核心让推荐话题取 --d-max-width 的 87%（1440 宽时约 966px），标题栏随父元素伸展（约 951px），
+// 都比帖子和按钮行（约 759px）宽，右边缘参差不齐。这里照抄核心算 #topic-footer-buttons 宽度的公式，
+// 核心调整帖子宽度时跟着变。手机宽度下栏宽大于屏宽，不起作用。
+#topic-title .title-wrapper,
+.more-topics__container {
+  max-width: calc(
+    var(--topic-avatar-width) + var(--topic-body-width) +
+      var(--topic-body-width-padding) * 2
+  );
+}
+
 // 核心用 `.d-header #site-text-logo` 设了 font-size（--font-up-3，约 24.25px），只写 #site-text-logo 压不过它；
 // 非 12px 整数倍的字号会让像素笔画发糊，所以这里跟核心用同样的针对性。
 .d-header #site-text-logo {
@@ -59,13 +71,11 @@
 }
 
 // 全站页脚（javascripts/discourse/components/gtmc-footer.gjs）。
-// 外层的宽度、居中和左右留白跟核心的 .wrap 取同样的变量，和正文左右对齐；
-// 侧边栏展开时正文让出左边一栏，外层在 desktop/desktop.scss 里跟着让出。手机宽度下链接自动换行。
+// 外层带核心的 .wrap 类，宽度、居中和左右留白都由它给出，和页头、正文共用同一对边缘；
+// 侧边栏展开时正文让出左边一栏，页脚在 desktop/desktop.scss 里跟着让出。手机宽度下链接自动换行。
 .gtmc-footer {
   box-sizing: border-box;
-  max-width: var(--d-max-width);
-  margin: var(--space-8) auto 0;
-  padding: 0 var(--d-wrap-padding-x);
+  margin-top: var(--space-8);
 }
 
 .gtmc-footer-content {
