@@ -1,7 +1,7 @@
 // 手机和桌面共用的样式。颜色一律来自配色方案（about.json 的 color_schemes），这里只用变量。
 
-// 像素字体只用于 Logo 文字（见 README「视觉规范 · 字体与字号」）：标题、侧边栏、按钮都用系统字体，
-// 两种字体在同一块区域里混排会像两个产品拼在一起。
+// 像素字体只用于标签（版块标签、置顶、版本号）、在线人数和日期块（见 README「视觉规范 · 字体与字号」）；
+// 正文、标题、按钮、提示一律系统字体，读得清楚。
 // 字体来自 Fusion Pixel 12px 的子集，字形按 12px 网格绘制；
 // 字号取 12px 的整数倍才能让每个像素格对应整数个屏幕像素，否则边缘发虚。
 // $gtmc-pixel-font 由 about.json 的 assets 注入，值是上传后文件的 URL。
@@ -23,6 +23,11 @@
 
   // 子集之外的字（生僻字、emoji）回落到站点正文字体，而不是浏览器默认的衬线体
   --gtmc-font-pixel: "GTMC Pixel", var(--font-family);
+
+  // 像素字体的字号：标签 12px，在线人数、日期块这类大数字 24px、36px（都是 12px 的整数倍，原因见上）
+  --gtmc-pixel-font-size: 12px;
+  --gtmc-pixel-font-size-large: 24px;
+  --gtmc-pixel-font-size-huge: 36px;
 
   // 方块感：核心默认 4px，收到 2px
   --d-border-radius: 2px;
@@ -47,14 +52,17 @@
     color-mix(in srgb, var(--tertiary) 35%, transparent) 62%
   );
 
-
   // 核心的 text-accent 令牌由 tertiary 的派生色算出，绿色强调色下对比度不足 AA，直接用 tertiary
   --token-color-text-accent: var(--tertiary);
   --token-color-text-accent-bolder: var(--tertiary);
 
-  // 交互状态，规则见 README「视觉规范 · 交互状态」。
-  // 120ms：快到点下去感觉不到延迟，又能让颜色切换不生硬。
-  --gtmc-state-transition-duration: 120ms;
+  // 动效只用这三个令牌（AGENTS.md「界面规则」，README「视觉规范 · 动效」），主题和插件共用。
+  // 状态切换 120ms：快到点下去感觉不到延迟，又能让颜色切换不生硬。
+  --gtmc-duration-state: 120ms;
+  // 提示停留 400ms 才出现，鼠标扫过不会闪
+  --gtmc-tooltip-delay: 400ms;
+  // 先快后慢的减速曲线，取自设计稿 c-server-first.html
+  --gtmc-ease: cubic-bezier(0.2, 0, 0, 1);
 
   // 实心按钮的方块下沿。颜色取核心的 --always-black-rgb，浅深色方案下都成立；
   // 它的值是逗号分隔的 r, g, b，所以只能用逗号写法 rgb(r, g, b, alpha)。
@@ -71,18 +79,50 @@
 
   // 核心按钮的过渡默认是 none，它把这个变量整个写进 transition 属性，所以这里逐个列出属性，不用 all
   --d-button-transition:
-    background-color var(--gtmc-state-transition-duration),
-    color var(--gtmc-state-transition-duration),
-    border-color var(--gtmc-state-transition-duration),
-    box-shadow var(--gtmc-state-transition-duration),
-    transform var(--gtmc-state-transition-duration);
+    background-color var(--gtmc-duration-state) var(--gtmc-ease),
+    color var(--gtmc-duration-state) var(--gtmc-ease),
+    border-color var(--gtmc-duration-state) var(--gtmc-ease),
+    box-shadow var(--gtmc-duration-state) var(--gtmc-ease),
+    transform var(--gtmc-duration-state) var(--gtmc-ease);
 }
 
+// 「减少动态效果」只把动画时长归零；提示的出现延迟不是动画，照旧，免得鼠标扫过时提示乱闪
 @media (prefers-reduced-motion: reduce) {
   :root {
-    --gtmc-state-transition-duration: 0s;
+    --gtmc-duration-state: 0s;
     --gtmc-pressed-offset: 0;
   }
+}
+
+// 像素字体的文字：标签、在线人数、日期块。插件里的这些元素也加 gtmc-pixel-text 类，
+// 大数字再把 font-size 换成 --gtmc-pixel-font-size-large / -huge（README「视觉规范 · 字体与字号」）。
+// 版块标签（话题列表、话题标题下、版块选择器里的版块名）是核心渲染的，只能选核心的类；核心改了类名会退回系统字体，不影响阅读。
+// 像素字体没有粗体，浏览器合成的粗体会让笔画糊在一起；关掉抗锯齿，笔画边缘才是硬的
+// （只有 macOS 上的 Chromium 和 Safari 认 -webkit-font-smoothing，别的平台本来就按系统设置渲染）。
+.gtmc-pixel-text,
+.badge-category__name {
+  font-family: var(--gtmc-font-pixel);
+  font-size: var(--gtmc-pixel-font-size);
+  font-weight: normal;
+  -webkit-font-smoothing: none;
+}
+
+// 置顶标签（gtmc-pinned-label.gjs）：强调色底，与按钮同色，深浅两套配色都取配色方案的对比色
+.gtmc-pinned-label {
+  display: inline-block;
+  margin-right: var(--space-2);
+  padding: 0 var(--space-1);
+  border-radius: var(--d-border-radius);
+  background: var(--tertiary);
+  color: var(--secondary);
+  line-height: var(--line-height-medium);
+  vertical-align: middle;
+}
+
+// 有了置顶标签，核心那个只是标示用的图钉图标就重复了，隐藏它；
+// 能点的图钉（.pin-toggle-button，可以取消置顶）是控件，保留
+.topic-list .topic-status.--pinned:not(.pin-toggle-button) {
+  display: none;
 }
 
 // 话题级栏宽（README「视觉规范 · 布局」）：标题、帖子、按钮行、推荐话题共用一栏。
@@ -140,7 +180,7 @@
 // 侧边栏的悬停色核心已经给了；话题列表行核心没有悬停效果。
 // 只在能悬停的设备上加悬停色：触屏浏览器会把 :hover 留在滚动起点那一行上（核心侧边栏同样这么处理）。
 .sidebar-section-link-wrapper .sidebar-section-link {
-  transition: background-color var(--gtmc-state-transition-duration);
+  transition: background-color var(--gtmc-duration-state) var(--gtmc-ease);
 
   &:active {
     background: var(--d-selected);
@@ -148,7 +188,7 @@
 }
 
 .topic-list-item {
-  transition: background-color var(--gtmc-state-transition-duration);
+  transition: background-color var(--gtmc-duration-state) var(--gtmc-ease);
 
   @media (hover: hover) {
     &:hover {

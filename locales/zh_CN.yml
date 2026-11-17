@@ -16,6 +16,8 @@ zh_CN:
       title: "同版块话题"
       empty: "这个版块暂时没有别的话题。"
       failed: "同版块的话题暂时加载不出来，刷新页面再试试。"
+  gtmc_topic_list:
+    pinned: "置顶"
   theme_metadata:
     description: "GTMC 社团论坛主题：深色优先，草方块绿强调色，圆角收小，仅 Logo 使用像素字体。"
     settings:

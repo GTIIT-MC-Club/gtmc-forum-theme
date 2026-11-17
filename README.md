@@ -1,6 +1,6 @@
 # GTMC 论坛主题
 
-Discourse 主题：浅色、深色两套配色跟随系统，草方块绿强调色，圆角收小、边框硬朗；**只有 Logo 文字用开源像素字体**，其余一律系统字体。
+Discourse 主题：浅色、深色两套配色跟随系统，草方块绿强调色，圆角收小、边框硬朗；**开源像素字体只用于标签、在线人数和日期块**，其余一律系统字体。
 不使用 Mojang 的任何素材，不复刻 Linux.do 的视觉稿。
 
 ## 目录
@@ -95,8 +95,13 @@ docker cp theme app:/tmp/gtmc-theme && docker cp infra/discourse/import_theme.rb
 
 ### 字体与字号
 
-- **像素字体只用于 Logo 文字**（`#site-text-logo`）。话题标题是用户内容，侧边栏、按钮、表单都是界面，一律用系统字体；
-  像素字体和系统字体在同一块区域里混排会像两个产品拼在一起。
+- **像素字体只用于标签、在线人数和日期块**：版块标签、置顶标签、版本号这类短标签，右栏的在线人数，活动的日期块。
+  正文、标题、按钮、提示框一律系统字体（`AGENTS.md`「界面规则」）：长文字用像素字体难读。
+  - 写法：元素加 `gtmc-pixel-text` 类（字体、12px、常规字重、关闭抗锯齿）；大数字再把 `font-size` 换成
+    `--gtmc-pixel-font-size-large`（24px）或 `--gtmc-pixel-font-size-huge`（36px）。字号只取 12px 的整数倍，原因见「像素字体」。
+  - 版块标签是核心渲染的，`common/common.scss` 直接给核心的 `.badge-category__name` 套同样的规则。
+  - 置顶标签由 `gtmc-pinned-label.gjs` 挂在话题列表的 `topic-list-before-status` 出口；核心那个只是标示用的图钉随之隐藏，
+    能点的图钉（可以取消置顶）是控件，保留。
 - 字号只用核心的几档变量，不写 px：
 
   | 层级 | 变量 | 用在 |
@@ -111,7 +116,7 @@ docker cp theme app:/tmp/gtmc-theme && docker cp infra/discourse/import_theme.rb
 
 ### 交互状态
 
-所有能点的东西用同一套反馈，时长都取 `--gtmc-state-transition-duration`（120ms：快到感觉不到延迟，又能让颜色变化不生硬）。
+所有能点的东西用同一套反馈，时长和曲线取下一节的动效令牌。
 
 | 控件 | 悬停 | 按下 | 键盘焦点 |
 |---|---|---|---|
@@ -128,6 +133,18 @@ docker cp theme app:/tmp/gtmc-theme && docker cp infra/discourse/import_theme.rb
   只用 `:focus-visible`，鼠标点击不出环。
 - **减少动态效果**：系统开了「减少动态效果」（`prefers-reduced-motion: reduce`）时过渡时长为 0，按下时不位移。
 - **不可点的东西没有悬停效果**。首页的服务器状态卡片是信息块不是链接，只和全站统一边框和圆角；卡片里的复制按钮和地图链接按上表走。
+
+### 动效
+
+只用三个令牌，定义在 `common/common.scss` 的 `:root`，插件也直接取用（`AGENTS.md`「界面规则」）：
+
+| 令牌 | 值 | 用在 |
+|---|---|---|
+| `--gtmc-duration-state` | 120ms | 悬停、按下、选中、展开这类状态切换；快到感觉不到延迟，又能让颜色变化不生硬 |
+| `--gtmc-tooltip-delay` | 400ms | 提示出现前的停留时间，鼠标扫过不会闪（见「全局提示」） |
+| `--gtmc-ease` | `cubic-bezier(0.2, 0, 0, 1)` | 所有过渡的曲线，先快后慢 |
+
+系统开了「减少动态效果」时 `--gtmc-duration-state` 为 0；提示的延迟不是动画，照旧。
 
 ### 边框与间距
 
@@ -151,8 +168,8 @@ docker cp theme app:/tmp/gtmc-theme && docker cp infra/discourse/import_theme.rb
 
 ### 用在哪里
 
-只用在 Logo 文字（`#site-text-logo`），字号 24px，是 12px 的整数倍，原因见 `common/common.scss`。
-话题标题、侧边栏、按钮、表单都用系统字体，见「视觉规范 · 字体与字号」。要扩大使用范围，先改那一节并说明理由。
+只用在标签、在线人数和日期块，字号只取 12px 的整数倍（12/24/36px），原因见 `common/common.scss`。
+话题标题、侧边栏、按钮、表单、提示框都用系统字体，见「视觉规范 · 字体与字号」。要扩大使用范围，先改那一节并说明理由。
 
 ### 重新生成子集
 
