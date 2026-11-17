@@ -3,7 +3,8 @@
   "authors": "GTMC",
   "theme_version": "0.1.0",
   "assets": {
-    "gtmc-pixel-font": "assets/fusion-pixel-12px-proportional-zh_hans-subset.woff2"
+    "gtmc-pixel-font": "assets/fusion-pixel-12px-proportional-zh_hans-subset.woff2",
+    "icons-sprite": "assets/gtmc-icons.svg"
   },
   "color_schemes": {
     "GTMC Dark": {

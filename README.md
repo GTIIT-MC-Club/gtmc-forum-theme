@@ -12,7 +12,8 @@ desktop/desktop.scss    仅桌面：话题页标题、侧边栏分组标题与�
 （没有 mobile/：手机端目前不需要额外样式，话题页标题因此保持正文字体；需要时再加 mobile/mobile.scss。
  桌面和手机的样式表是分开编译、按设备二选一加载的，所以 desktop.scss 里的规则不会影响手机。）
 locales/                主题描述（theme_metadata.description），没有其他界面文字
-assets/                 子集化后的像素字体（woff2）
+assets/                 子集化后的像素字体（woff2）、像素图标精灵 gtmc-icons.svg（由 icons/ 生成）
+icons/                  像素图标的源文件（每个图标一个 16×16 文本网格）和生成精灵的脚本，见「图标」
 fonts/                  字体的许可文件、子集字符表（不随主题上传时也要保留，见下）
 ```
 
@@ -121,6 +122,51 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 
 产物复制到 `theme/assets/`，文件名保持不变（`about.json` 里按这个路径注册）。
 `--name-IDs='*'` 是为了保留字体文件里的版权和许可字段（name 表的 0、13、14 号）。
+
+## 图标
+
+`assets/gtmc-icons.svg` 是本站的自定义图标精灵，在 `about.json` 里以 `icons-sprite` 这个名字注册
+（核心 `lib/svg_sprite.rb` 只认这个名字），精灵里每个 `<symbol>` 的 `id` 就是图标名，
+导入主题后可以在任何填图标名的地方使用：版块的图标样式、侧边栏链接、`dIcon`。
+
+- **来源**：全部由本仓库从零绘制，原创，随主题同许可发布。**没有**描摹、取色或参照 Minecraft 原版贴图和图标（PLAN 第 0 节非目标），
+  只取告示牌、蛋糕、砖墙这类通用题材。新增图标也必须遵守这一条。
+- **规格**：16×16 网格、整数坐标、单色 `fill="currentColor"`、`shape-rendering="crispEdges"`。
+  单色是为了让图标跟着所在位置的文字颜色走：侧边栏和版块徽章里取版块颜色，深浅两套配色下都不用另画。
+- **源文件**：`icons/<图标名>.txt`，16 行、每行 16 个字符，`#` 是实心像素，`.` 是空白。
+  `icons/build_sprite.rb` 把每行连续的实心像素合成一个矩形，拼成精灵。**不要手改 `gtmc-icons.svg`**。
+
+| 图标 | 用在 |
+|---|---|
+| `gtmc-sign` 告示牌 | 公告 |
+| `gtmc-cake` 蛋糕 | 活动 |
+| `gtmc-bricks` 砖墙 | 建筑展示 |
+| `gtmc-gear` 齿轮 | 红石与技术 |
+| `gtmc-chest` 箱子 | 模组与资源 |
+| `gtmc-scroll` 卷轴 | 白名单与申诉 |
+| `gtmc-bucket` 水桶 | 水吧 |
+| `gtmc-crown` 王冠 | 老玩家俱乐部 |
+| `gtmc-layers` 叠起的方块 | 侧边栏：最新话题 |
+| `gtmc-compass` 指南针 | 侧边栏：新人指南 |
+| `gtmc-medal` 奖章 | 侧边栏：徽章 |
+| `gtmc-players` 两个人 | 侧边栏：用户 |
+| `gtmc-magnifier` 放大镜 | 侧边栏：审核（仅管理人员可见） |
+| `gtmc-hammer` 锤子 | 侧边栏：管理（仅管理员可见） |
+| `gtmc-quill` 羽毛笔 | 侧边栏「更多」：我的帖子 |
+| `gtmc-envelope` 信封 | 侧边栏「更多」：我的消息 |
+| `gtmc-door` 门 | 侧边栏「更多」：邀请 |
+| `gtmc-info` 信息牌 | 侧边栏「更多」：关于 |
+| `gtmc-banner` 旗帜 | 侧边栏「更多」：群组 |
+
+版块和侧边栏用哪个图标写在 `infra/discourse/sidebar.rb`，改了上表要同步改那里。
+
+### 新增一个图标
+
+1. 在 `icons/` 下新建 `gtmc-<英文名>.txt`，画 16×16 的网格。名字用 `gtmc-` 开头，免得和核心或插件的图标重名。
+   照着已有的文件画：轮廓留 1 格边距，线条至少 1 格、细节之间至少隔 1 格，否则 16px 下糊成一团。
+2. 在仓库根目录运行 `ruby theme/icons/build_sprite.rb`（只用标准库），它会检查行数和字符并重写 `assets/gtmc-icons.svg`。
+3. 把 `.txt` 和重新生成的 `.svg` 一起提交，在上表补一行，然后重新导入主题。
+4. 在浏览器里看 16px 下的效果：深浅两套配色都看一遍。
 
 ## 待验证
 
