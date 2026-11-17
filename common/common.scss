@@ -40,6 +40,37 @@
   // 核心的 text-accent 令牌由 tertiary 的派生色算出，绿色强调色下对比度不足 AA，直接用 tertiary
   --token-color-text-accent: var(--tertiary);
   --token-color-text-accent-bolder: var(--tertiary);
+
+  // 交互状态，规则见 README「视觉规范 · 交互状态」。
+  // 120ms：快到点下去感觉不到延迟，又能让颜色切换不生硬。
+  --gtmc-state-transition-duration: 120ms;
+
+  // 实心按钮的方块下沿。颜色取核心的 --always-black-rgb，浅深色方案下都成立；
+  // 它的值是逗号分隔的 r, g, b，所以只能用逗号写法 rgb(r, g, b, alpha)。
+  // 2px、0.3 不透明度是在两套配色下都看得出又不抢眼的经验值。
+  --gtmc-block-edge-height: 2px;
+  --gtmc-block-edge-color: rgb(var(--always-black-rgb), 0.3);
+
+  // 按下时下沿消失、整体下移 1px，像方块被按进去
+  --gtmc-pressed-offset: 1px;
+
+  // 键盘焦点环：2px 粗、外移 2px，中间露出一圈页面底色，主按钮（底色也是 --tertiary）上也看得清
+  --gtmc-focus-ring-width: 2px;
+  --gtmc-focus-ring-offset: 2px;
+
+  // 核心按钮的过渡默认是 none，它把这个变量整个写进 transition 属性，所以这里逐个列出属性，不用 all
+  --d-button-transition: background-color var(--gtmc-state-transition-duration),
+    color var(--gtmc-state-transition-duration),
+    border-color var(--gtmc-state-transition-duration),
+    box-shadow var(--gtmc-state-transition-duration),
+    transform var(--gtmc-state-transition-duration);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --gtmc-state-transition-duration: 0s;
+    --gtmc-pressed-offset: 0;
+  }
 }
 
 // 话题级栏宽（README「视觉规范 · 布局」）：标题、帖子、按钮行、推荐话题共用一栏。
@@ -71,11 +102,70 @@
   line-height: 1;
 }
 
-// 主按钮加一条深色下沿，像方块的立体边；颜色取核心的 --always-black-rgb，浅深色方案下都成立。
-// 它的值是逗号分隔的 r, g, b，所以只能用逗号写法 rgb(r, g, b, alpha)，不能用斜杠写法。
-// 2px 的厚度和 0.3 的不透明度是在浅深两套配色下都看得出又不抢眼的经验值，上线后看效果再调。
-.btn-primary {
-  box-shadow: inset 0 -2px 0 rgb(var(--always-black-rgb), 0.3);
+// 实心按钮（默认、主、危险、成功；不带变体类的 .btn 核心也按默认按钮画）：方块下沿，按下时下沿消失并下移。
+// 扁平、透明、链接样式的按钮没有底色，加下沿会像一道划痕，按下时改为换底色（见下一条）。
+.btn:not(.btn-flat, .btn-transparent, .btn-link) {
+  box-shadow: inset 0 calc(-1 * var(--gtmc-block-edge-height)) 0
+    var(--gtmc-block-edge-color);
+
+  &:active:not(:disabled, .disabled) {
+    box-shadow: none;
+    transform: translateY(var(--gtmc-pressed-offset));
+  }
+}
+
+// 扁平和透明按钮（帖子下的图标按钮、编辑器工具栏等）按下时换成「选中」底色。
+// 核心的悬停规则是 `.discourse-no-touch .btn-flat:hover`，按下时它同时生效，所以这里用同样的针对性、靠加载顺序压过它。
+// 帖子下的按钮核心另有一条 `.discourse-no-touch nav.post-controls .actions button:active`，
+// 把按下画成悬停色，只能照它的选择器写一遍。
+.discourse-no-touch .btn-flat:active:not(:disabled, .disabled),
+.discourse-no-touch .btn-transparent:active:not(:disabled, .disabled),
+.discourse-no-touch nav.post-controls .actions button:active {
+  background: var(--d-selected);
+}
+
+// 侧边栏项和话题列表行：悬停换 --d-hover 底色，按下换 --d-selected，颜色变化带同一个过渡时长。
+// 侧边栏的悬停色核心已经给了；话题列表行核心没有悬停效果。
+// 只在能悬停的设备上加悬停色：触屏浏览器会把 :hover 留在滚动起点那一行上（核心侧边栏同样这么处理）。
+.sidebar-section-link-wrapper .sidebar-section-link {
+  transition: background-color var(--gtmc-state-transition-duration);
+
+  &:active {
+    background: var(--d-selected);
+  }
+}
+
+.topic-list-item {
+  transition: background-color var(--gtmc-state-transition-duration);
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--d-hover);
+    }
+  }
+
+  &:active {
+    background-color: var(--d-selected);
+  }
+}
+
+// 键盘焦点环。核心给 .btn、.btn-flat、帖子下的按钮、侧边栏项的 :focus-visible 写了 outline: none，
+// 焦点只表现为悬停色，键盘用户分不清焦点停在哪里。这里的选择器与核心那几条针对性相同，
+// 靠主题样式表在核心之后加载取胜。只用 :focus-visible，鼠标点击不会出环。
+a:focus-visible,
+.btn:focus-visible,
+.btn-flat:focus-visible,
+.discourse-no-touch nav.post-controls .actions button:focus-visible {
+  outline: var(--gtmc-focus-ring-width) solid var(--tertiary);
+  outline-offset: var(--gtmc-focus-ring-offset);
+}
+
+// 侧边栏和话题列表的容器会裁掉超出边界的内容，外移的环会被切掉一半，所以这两处把环画在元素内侧。
+// 话题列表的标题链接本身被核心去掉了焦点样式（它原本靠键盘快捷键的 .selected 标示），环画在整行上。
+.sidebar-section-link-wrapper .sidebar-section-link:focus-visible,
+.topic-list-item:has(.title:focus-visible) {
+  outline: var(--gtmc-focus-ring-width) solid var(--tertiary);
+  outline-offset: calc(-1 * var(--gtmc-focus-ring-width));
 }
 
 // 全站页脚（javascripts/discourse/components/gtmc-footer.gjs）。
