@@ -55,7 +55,7 @@ cd theme && zip -r ../gtmc-theme.zip about.json assets common desktop locales
    原因：核心默认是 Inter，它不含中文，中文会回落到系统字体但字重和间距不一致。
 4. **Logo**：不要上传 Logo 图片（核心默认的 Logo 图已由 `site_settings.rb` 清掉）。站点没有 Logo 图片时，页头显示站点标题文字（`site_settings.rb` 设的「GTMC 论坛」），
    这段文字就是用像素字体渲染的。上传了图片则不会走像素字体。
-5. **侧边栏**：核心的 `navigation_menu` 设置默认就是 `sidebar`，无需操作；分区和链接的配置见 `infra/README.md`。
+5. **侧边栏与版块图标**：导入主题之后执行 `infra/discourse/sidebar.rb`（它要用主题里的图标，所以排在导入之后），不要在后台手动配。见 `infra/content/admin-setup.md` 第一节。
 
 ## 配色与对比度
 
