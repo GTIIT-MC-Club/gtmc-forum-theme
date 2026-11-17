@@ -1,6 +1,6 @@
 // 仅桌面端的样式。
 
-// 话题页标题。手机上不用像素体（见 mobile.scss）。
+// 话题页标题。手机端不加载本文件，标题保持系统字体。
 #topic-title .fancy-title {
   font-family: var(--gtmc-font-pixel);
   font-size: var(--gtmc-pixel-size-title);

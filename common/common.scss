@@ -42,7 +42,9 @@
   --token-color-text-accent-bolder: var(--tertiary);
 }
 
-#site-text-logo {
+// 核心用 `.d-header #site-text-logo` 设了 font-size（--font-up-3，约 24.25px），只写 #site-text-logo 压不过它；
+// 非 12px 整数倍的字号会让像素笔画发糊，所以这里跟核心用同样的针对性。
+.d-header #site-text-logo {
   font-family: var(--gtmc-font-pixel);
   font-size: var(--gtmc-pixel-size-title);
   font-weight: normal; // 像素字体没有粗体，浏览器合成的粗体会让笔画糊在一起
