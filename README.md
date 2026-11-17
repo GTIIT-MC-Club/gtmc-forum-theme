@@ -197,8 +197,12 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 
 - **来源**：全部由本仓库从零绘制，原创，随主题同许可发布。**没有**描摹、取色或参照 Minecraft 原版贴图和图标（PLAN 第 0 节非目标），
   只取告示牌、蛋糕、砖墙这类通用题材。新增图标也必须遵守这一条。
-- **规格**：16×16 网格、整数坐标、单色 `fill="currentColor"`、`shape-rendering="crispEdges"`。
+- **规格**：8×8 网格、整数坐标、单色 `fill="currentColor"`、`shape-rendering="crispEdges"`。
   单色是为了让图标跟着所在位置的文字颜色走：侧边栏和版块徽章里取版块颜色，深浅两套配色下都不用另画。
+- **显示尺寸**：只以 8px 的整数倍显示（16/24/32px），一个网格格子正好对应整数个屏幕像素，边缘才不发虚（`AGENTS.md`「界面规则」）。
+  `common/common.scss` 把所有 `gtmc-` 图标统一定为 `--gtmc-icon-size`（16px），不随所在位置的字号缩放。
+  要更大的图标（如右栏的图标块）用 24px 或 32px，不要用别的值。
+- **设计稿**：`design/brand/icons-8x8/` 是设计阶段的同一套文件。以本目录为准，改图标改这里。
 - **文件**：`icons/gtmc-<英文名>.svg`，普通的独立 SVG，必须有 `viewBox`。打包时颜色会被统一换成 `currentColor`，
   所以画的时候用什么颜色都行，但只能是单色剪影。
 
@@ -223,13 +227,18 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 | `gtmc-door` 门 | 侧边栏「更多」：邀请 |
 | `gtmc-info` 信息牌 | 侧边栏「更多」：关于 |
 | `gtmc-banner` 旗帜 | 侧边栏「更多」：群组 |
+| `gtmc-copy` 两张纸 | 右栏服务器面板：复制地址 |
+| `gtmc-chevron` 向下尖角 | 右栏：展开折叠的条目 |
+| `gtmc-bubble` 对话气泡 | 回复数 |
+| `gtmc-eye` 眼睛 | 浏览数 |
+| `gtmc-heart` 心 | 点赞数 |
 
-版块和侧边栏用哪个图标写在 `infra/discourse/sidebar.rb`，改了上表要同步改那里。
+版块和侧边栏用哪个图标写在 `infra/discourse/sidebar.rb`，改了上表要同步改那里；后五个由插件和主题的组件直接用图标名引用。
 
 ### 新增或修改一个图标
 
-1. 用任何能导出 SVG 的工具在 16×16 画布上画（Inkscape、Figma 都行；像素画工具导出的 SVG 也可以）。
-   轮廓留 1 格边距，线条至少 1 格、细节之间至少隔 1 格，否则 16px 下糊成一团。名字用 `gtmc-` 开头，免得和核心或插件的图标重名。
+1. 用任何能导出 SVG 的工具在 8×8 画布上画（Inkscape、Figma 都行；像素画工具导出的 SVG 也可以），每格一个整数坐标的方块。
+   8×8 只容得下剪影：线条 1 格，细节之间至少隔 1 格，否则 16px 下糊成一团。名字用 `gtmc-` 开头，免得和核心或插件的图标重名。
 2. 存成 `icons/gtmc-<英文名>.svg`（改已有图标就直接覆盖那个文件）。导入脚本会检查文件名和 `viewBox`，不合格就报错退出。
 3. 在上表补一行，提交，然后重新导入主题。
 4. 在浏览器里看 16px 下的效果：深浅两套配色都看一遍。

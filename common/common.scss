@@ -15,6 +15,9 @@
   // Logo 文字的字号，取 12px 的整数倍（原因见上）
   --gtmc-logo-font-size: 24px;
 
+  // 像素图标按 8×8 网格画，显示尺寸只取 8px 的整数倍，一格才对应整数个屏幕像素（README「图标」）
+  --gtmc-icon-size: 16px;
+
   // 子集之外的字（生僻字、emoji）回落到站点正文字体，而不是浏览器默认的衬线体
   --gtmc-font-pixel: "GTMC Pixel", var(--font-family);
 
@@ -213,4 +216,14 @@ a:focus-visible,
 .gtmc-footer-disclaimer {
   margin: 0;
   font-size: var(--font-down-2);
+}
+
+// 像素图标的显示尺寸。核心按所在位置的字号缩放图标（版块徽章约 13px、侧边栏约 14px），
+// 不是 8 的整数倍时一格像素会被拉成宽窄不一的条。核心的图标都带 d-icon-<图标名> 类，这里只挑出主题自己的 gtmc- 图标。
+// 版块徽章里核心用 `.badge-category__wrapper .badge-category.--style-icon .d-icon` 定成 0.74em，
+// 第二个选择器与它针对性相同，靠主题样式表在核心之后加载取胜。
+.d-icon[class*="d-icon-gtmc-"],
+.badge-category__wrapper .badge-category.--style-icon .d-icon[class*="d-icon-gtmc-"] {
+  width: var(--gtmc-icon-size);
+  height: var(--gtmc-icon-size);
 }
