@@ -1,6 +1,6 @@
 # GTMC 论坛主题
 
-Discourse 主题：深色优先，草方块绿强调色，圆角收小、边框硬朗；Logo 文字和少数标题用开源像素字体，**正文用系统字体**。
+Discourse 主题：浅色、深色两套配色跟随系统，草方块绿强调色，圆角收小、边框硬朗；Logo 文字和少数标题用开源像素字体，**正文用系统字体**。
 不使用 Mojang 的任何素材，不复刻 Linux.do 的视觉稿。
 
 ## 目录
@@ -29,35 +29,43 @@ gem install discourse_theme
 discourse_theme watch theme/        # 首次运行会问站点地址和 API Key，之后保存修改会实时同步
 ```
 
-没有测试站的话，视觉效果无从验证，见本文末尾「待验证」。
+本地开发站的搭法不在本仓库里；视觉效果要在站上看，还没逐项看过的见本文末尾「待验证」。
 
 ## 部署到论坛
 
 主题放在仓库的 `theme/` 子目录。Discourse 的「从 Git 仓库安装」会克隆整个仓库并在仓库根目录找 `about.json`
-（核心的 `git_importer.rb` 里没有子目录选项），所以这里用压缩包。压缩包导入时，如果解压后只有一个顶层文件夹会自动剥掉，
-否则直接把根目录当主题根（`zip_importer.rb` 的 `strip_root_directory`），`about.json` 放在压缩包顶层即可：
+（核心的 `git_importer.rb` 里没有子目录选项），所以用压缩包导入。打包、导入、设默认主题、设配色都由
+`infra/discourse/import_theme.rb` 完成，不要在后台手动传压缩包：
 
 ```sh
-cd theme && zip -r ../gtmc-theme.zip about.json assets common desktop javascripts locales settings.yml
+docker cp theme app:/tmp/gtmc-theme && docker cp infra/discourse/import_theme.rb app:/tmp/ && \
+  docker exec -u discourse -w /var/www/discourse app \
+    bundle exec rails runner /tmp/import_theme.rb /tmp/gtmc-theme
 ```
 
-后台 → 外观 → 主题 → 安装 → 从你的设备，选择压缩包。之后改了主题再传一次同名压缩包即可更新。
-（`fonts/` 不需要上传，里面是给仓库读者看的许可文件和字符表。）
+脚本把 `theme/` 里除 `fonts/`、`icons/`、`README.md` 以外的文件打成压缩包（这三项只给仓库读者看，
+图标精灵 `assets/gtmc-icons.svg` 是 `icons/` 的产物，会打进去），已有 GTMC 主题就原地更新，没有就新建；
+导入后检查主题的样式和模板有没有编译错误，有就报错退出。改了主题后重跑即可，可重复执行；
+后台里设过的主题设置（如 `discord_invite_url`）不会被覆盖。
 
-### 装完后在后台要做的设置
+### 脚本替你做的设置
 
-1. **设为默认主题**：外观 → 主题，把「GTMC」设为默认。
-2. **配色方案**：`about.json` 里 `GTMC Dark` 排在第一，新装主题时 Discourse 把第一个方案设为默认，所以全站默认深色。
-   - 这个主题**没有**使用 `only_theme_color_schemes`，`GTMC Light` 不会自动出现在用户的界面偏好里。
-     想让用户能切换，到 外观 → 配色方案 → `GTMC Light`，勾选允许用户选择（核心字段名 `user_selectable`，界面文字以当前版本为准）。
-   - 在主题的配色设置里，把「深色模式配色」也指向 `GTMC Dark`，免得系统是深色模式的访客看到核心自带的 Dark。
-3. **字体**：基础字体和标题字体用系统字体，已由 `infra/discourse/site_settings.rb` 设置
+1. **设为默认主题**：GTMC 成为全站默认主题。
+2. **配色方案跟随系统**：浅色配色设为 `GTMC Light`，深色配色设为 `GTMC Dark`
+   （核心字段 `Theme#color_scheme_id` 和 `dark_color_scheme_id`），访客系统是深色模式时自动用深色。
+   两套配色都设为允许用户在「偏好设置 → 界面」里自选（`ColorScheme#user_selectable`）。
+   这里要显式设两个：新建主题时核心只把 `about.json` 里排第一的配色设为浅色配色、深色配色留空。
+   这个主题没有使用 `only_theme_color_schemes`，核心不会替我们设。
+
+下面几项不由 `import_theme.rb` 管，仍按原来的做法：
+
+1. **字体**：基础字体和标题字体用系统字体，已由 `infra/discourse/site_settings.rb` 设置
    （`base_font` / `heading_font` 均为 `system`），不需要手动操作。
    原因：核心默认是 Inter，它不含中文，中文会回落到系统字体但字重和间距不一致。
-4. **Logo**：不要上传 Logo 图片（核心默认的 Logo 图已由 `site_settings.rb` 清掉）。站点没有 Logo 图片时，页头显示站点标题文字（`site_settings.rb` 设的「GTMC 论坛」），
+2. **Logo**：不要上传 Logo 图片（核心默认的 Logo 图已由 `site_settings.rb` 清掉）。站点没有 Logo 图片时，页头显示站点标题文字（`site_settings.rb` 设的「GTMC 论坛」），
    这段文字就是用像素字体渲染的。上传了图片则不会走像素字体。
-5. **侧边栏与版块图标**：导入主题之后执行 `infra/discourse/sidebar.rb`（它要用主题里的图标，所以排在导入之后），不要在后台手动配。见 `infra/content/admin-setup.md` 第一节。
-6. **页脚的 Discord 链接**：外观 → 主题 → GTMC → 设置，把 `discord_invite_url` 填成社团的 Discord 邀请链接；留空则页脚不显示这个链接。
+3. **侧边栏与版块图标**：导入主题之后执行 `infra/discourse/sidebar.rb`（它要用主题里的图标，所以排在导入之后），不要在后台手动配。见 `infra/content/admin-setup.md` 的执行顺序一节。
+4. **页脚的 Discord 链接**：外观 → 主题 → GTMC → 设置，把 `discord_invite_url` 填成社团的 Discord 邀请链接；留空则页脚不显示这个链接。
 
 ## 配色与对比度
 
@@ -190,11 +198,10 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 
 ## 待验证
 
-没有测试站，下面这些**只做了静态检查**，需要在真站上看：
+下面这些还**没有逐项在运行中的站上核对过**（只做了静态检查，或只对照过核心源码）：
 
 - 桌面和手机宽度下，首页、话题页、发帖框、用户页、管理后台有没有错位或看不清的文字。
 - `#site-text-logo`、`#topic-title .fancy-title`、`.sidebar-section-header-text`、`.sidebar-section-link.active`
   这几个核心选择器在当前 Discourse 版本里是否仍然命中（只对照过 `discourse/discourse` 主分支的源码，没有对着运行中的实例看过）。
 - 像素字体是否被 Discourse 正确上传并通过 `$gtmc-pixel-font` 注入（浏览器开发者工具里看 `@font-face` 的 `src` 是否是 `/uploads/...`）。
-- 压缩包导入是否把 `about.json` 的两套配色、字体资源都建出来。
 - 手机端 24px 的 Logo 文字在页头里是否放得下；放不下就新增 `mobile/mobile.scss` 把 `--gtmc-pixel-size-title` 调小。
