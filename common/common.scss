@@ -1,0 +1,56 @@
+// 手机和桌面共用的样式。颜色一律来自配色方案（about.json 的 color_schemes），这里只用变量。
+
+// 像素字体只用于 Logo 文字和少数标题（见 README「像素字体用在哪里」），不用于正文。
+// 字体来自 Fusion Pixel 12px 的子集，字形按 12px 网格绘制；
+// 字号取 12px 的整数倍才能让每个像素格对应整数个屏幕像素，否则边缘发虚。
+// $gtmc-pixel-font 由 about.json 的 assets 注入，值是上传后文件的 URL。
+@font-face {
+  font-family: "GTMC Pixel";
+  src: url($gtmc-pixel-font) format("woff2");
+  font-display: swap;
+}
+
+:root {
+  // 字号取 12px 的整数倍（原因见上）；桌面端的话题标题、侧边栏标题也引用这两个变量
+  --gtmc-pixel-size-title: 24px;
+  --gtmc-pixel-size-label: 12px;
+
+  // 子集之外的字（生僻字、emoji）回落到站点正文字体，而不是浏览器默认的衬线体
+  --gtmc-font-pixel: "GTMC Pixel", var(--font-family);
+
+  // 方块感：核心默认 4px，收到 2px
+  --d-border-radius: 2px;
+
+  // 分类色标：方形、加大，在话题列表里一眼能分辨版块
+  --category-badge-size: 0.9em;
+  --category-badge-border-radius: 0;
+
+  // 导航下划线加粗，边框硬朗
+  --d-nav-underline-height: 0.2em;
+
+  // 话题列表更紧凑，一屏多看几条
+  --d-topic-list-data-padding-y: var(--space-2);
+  --d-topic-list-header-data-padding-y: var(--space-2);
+  --d-topic-list-title-font-size: var(--font-0);
+
+  // 侧边栏选中项用配色方案的「选中」底色，不用核心默认的灰阶
+  --d-sidebar-active-background: var(--d-selected);
+  --d-sidebar-active-color: var(--primary);
+
+  // 核心的 text-accent 令牌由 tertiary 的派生色算出，绿色强调色下对比度不足 AA，直接用 tertiary
+  --token-color-text-accent: var(--tertiary);
+  --token-color-text-accent-bolder: var(--tertiary);
+}
+
+#site-text-logo {
+  font-family: var(--gtmc-font-pixel);
+  font-size: var(--gtmc-pixel-size-title);
+  font-weight: normal; // 像素字体没有粗体，浏览器合成的粗体会让笔画糊在一起
+  line-height: 1;
+}
+
+// 主按钮加一条深色下沿，像方块的立体边；颜色取核心的 --always-black-rgb，浅深色方案下都成立。
+// 它的值是逗号分隔的 r, g, b，所以只能用逗号写法 rgb(r, g, b, alpha)，不能用斜杠写法。
+.btn-primary {
+  box-shadow: inset 0 -2px 0 rgb(var(--always-black-rgb), 0.3);
+}

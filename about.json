@@ -1,0 +1,46 @@
+{
+  "name": "GTMC",
+  "authors": "GTMC",
+  "theme_version": "0.1.0",
+  "assets": {
+    "gtmc-pixel-font": "assets/fusion-pixel-12px-proportional-zh_hans-subset.woff2"
+  },
+  "color_schemes": {
+    "GTMC Dark": {
+      "primary": "e6eae3",
+      "secondary": "171a17",
+      "tertiary": "6cc04a",
+      "quaternary": "c08a4e",
+      "header_background": "0e100e",
+      "header_primary": "e6eae3",
+      "highlight": "6b5a1d",
+      "selected": "1e3a1b",
+      "hover": "252a25",
+      "danger": "f0705a",
+      "success": "5cc16a",
+      "love": "fa6c8d",
+      "primary-medium": "9aac8d",
+      "primary-600": "9aac8d"
+    },
+    "GTMC Light": {
+      "primary": "1b211a",
+      "secondary": "f5f6f1",
+      "tertiary": "2a741b",
+      "quaternary": "8a5a2b",
+      "header_background": "fbfbf8",
+      "header_primary": "1b211a",
+      "highlight": "f5e08a",
+      "selected": "dff0d8",
+      "hover": "e9ece4",
+      "danger": "b3261e",
+      "success": "1f7a32",
+      "love": "d6336c",
+      "primary-medium": "5b6d58",
+      "primary-600": "5b6d58",
+      "primary-500": "717f6d",
+      "primary-400": "7f8f7b",
+      "primary-low-mid": "7f8f7b",
+      "header_primary-medium": "566853"
+    }
+  }
+}

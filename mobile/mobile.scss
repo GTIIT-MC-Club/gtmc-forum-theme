@@ -1,0 +1,6 @@
+// 仅手机端的样式。
+// 话题页标题不用像素体：手机屏幕窄，24px 的像素字会把长标题折成很多行，
+// 所以回到正文字体（common 里的 Logo 文字仍是像素体）。
+#topic-title .fancy-title {
+  font-family: var(--font-family);
+}
