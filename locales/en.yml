@@ -22,5 +22,5 @@ en:
     description: "Dark-first Minecraft-flavoured theme for the GTMC club forum: grass-green accent, square corners, pixel font for the logo only."
     settings:
       discord_invite_url: "Discord invite link shown in the footer (https://discord.gg/…). Leave empty to hide the link."
-      footer_newcomer_guide_url: "Footer link to the newcomer guide. Written by infra/discourse/sidebar.rb to match the sidebar; do not edit by hand."
+      footer_newcomer_guide_url: "Footer link to the pinned newcomer guide topic. Written by infra/discourse/sidebar.rb; do not edit by hand."
       footer_appeal_url: "Footer link to the whitelist & appeals category. Written by infra/discourse/sidebar.rb; do not edit by hand."

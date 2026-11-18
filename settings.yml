@@ -6,7 +6,7 @@ discord_invite_url:
   type: string
   default: ""
 
-# 下面两个由 infra/discourse/sidebar.rb 写入，与侧边栏的「新人指南」、版块地址保持一致，不要手改。
+# 下面两个由 infra/discourse/sidebar.rb 写入（「新人指南」置顶帖、「白名单与申诉」版块的地址），不要手改。
 # 版块地址带数据库 id，每个站点不同，所以不能写死在主题里。
 footer_newcomer_guide_url:
   type: string

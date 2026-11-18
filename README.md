@@ -233,13 +233,13 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 | `gtmc-sign` 告示牌 | 公告 |
 | `gtmc-cake` 蛋糕 | 活动 |
 | `gtmc-bricks` 砖墙 | 建筑展示 |
-| `gtmc-gear` 齿轮 | 红石与技术 |
-| `gtmc-chest` 箱子 | 模组与资源 |
+| `gtmc-gear` 齿轮 | 技术开发 |
+| `gtmc-chest` 箱子 | 资源分享 |
 | `gtmc-scroll` 卷轴 | 白名单与申诉 |
 | `gtmc-bucket` 水桶 | 水吧 |
 | `gtmc-crown` 王冠 | 老玩家俱乐部 |
 | `gtmc-layers` 叠起的方块 | 侧边栏：最新话题 |
-| `gtmc-compass` 指南针 | 侧边栏：新人指南 |
+| `gtmc-compass` 指南针 | 新人指南 |
 | `gtmc-medal` 奖章 | 侧边栏：徽章 |
 | `gtmc-players` 两个人 | 侧边栏：用户 |
 | `gtmc-magnifier` 放大镜 | 侧边栏：审核（仅管理人员可见） |
@@ -321,7 +321,7 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 - **文字**：全部在 `locales/zh_CN.yml` 和 `locales/en.yml` 的 `gtmc_footer` 下，经 `themePrefix` 取用，改文字不用动组件。
 - **链接**：来自 `settings.yml` 的三个设置，留空的不显示；「关于」是核心自带页面，地址固定为 `/about`。
   - `discord_invite_url`：管理员在后台填（邀请会过期、会重建，没有能写死的值）。
-  - `footer_newcomer_guide_url`、`footer_appeal_url`：由 `infra/discourse/sidebar.rb` 写入，与侧边栏指向同一处。
+  - `footer_newcomer_guide_url`、`footer_appeal_url`：由 `infra/discourse/sidebar.rb` 写入，分别指向「新人指南」置顶帖和「白名单与申诉」版块。
     地址带数据库 id（`/c/<名字>/<id>`、`/t/<名字>/<id>`），每个站点不同，所以不能写死在主题里。
     **不要在后台手改**，重跑 `sidebar.rb` 会改回来。
 - **样式**：在 `common/common.scss`，只用 CSS 变量，类名以 `gtmc-footer` 开头；手机宽度下链接自动换行。
