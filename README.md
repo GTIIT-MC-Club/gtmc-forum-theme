@@ -20,9 +20,7 @@ Discourse 主题：浅色、深色两套配色跟随系统，草方块绿强调�
 about.json              主题元数据、两套配色、像素字体的注册
 common/common.scss      手机和桌面共用：字体声明、核心 CSS 变量覆盖、Logo、按钮
 desktop/desktop.scss    仅桌面：页面宽度固定（侧边栏收起时不变窄，开关不动）、侧边栏展开时页脚与正文对齐、右栏的分栏
-（没有 mobile/：手机端目前不需要额外样式，需要时再加 mobile/mobile.scss。
- 当前版本的核心不按设备二选一，而是给桌面样式表加 media="(width >= 40rem)"：视口不小于 640px 就加载，
- 所以手机竖屏不受 desktop.scss 影响，但横屏的平板会加载它。）
+mobile/                 （暂无）
 javascripts/            页脚、右栏、置顶标签、全局提示的组件（Glimmer）和挂载它们的 api-initializer，见「页脚」「右栏」「全局提示」
 test/                   QUnit 测试，随主题上传，见「全局提示 · 测试」
 locales/                主题描述、设置项说明（theme_metadata）和页脚的界面文字（中英文）
@@ -42,7 +40,7 @@ gem install discourse_theme
 discourse_theme watch .        # 在本仓库根目录执行； 首次运行会问站点地址和 API Key，之后保存修改会实时同步
 ```
 
-本地开发站的搭法不在本仓库里；视觉效果要在站上看，还没逐项看过的见本文末尾「待验证」。
+本地开发站的搭法不在本仓库里；视觉效果要在站上看。
 
 ## 部署到论坛
 
@@ -93,14 +91,14 @@ docker cp infra/discourse/import_theme.rb app:/tmp/ && \
 ## 视觉规范
 
 改样式之前先对照这一节；新规则和这里冲突时，要么改规则，要么先改这一节并说明原因。
-借鉴的是 Linux.do 的手感（布局、间距、交互反馈），不是它的配色和视觉稿。下面的 `--gtmc-*` 变量都定义在 `common/common.scss` 的 `:root`；
+借鉴的是 Linux.do 的手感（布局、间距、交互反馈），不是它的配色和视觉稿。设计令牌（颜色、间距、动效、图标尺寸）定义在 `common/common.scss` 的 `:root`；少数依赖作用域的变量写在用到它们的规则里并注明原因。
 依赖核心在内层元素上才改写的变量（如 `--d-sidebar-width`）的宽度不要存成 `:root` 变量，直接写在用到的规则里。
 
 ### 布局：两级边缘
 
 - **页面级**：页头、正文区、页脚共用同一对左右边缘，即核心 `.wrap` 的宽度。桌面端这个宽度固定为
   侧边栏宽 + 核心的 `--d-max-width`，**侧边栏收起时也不变窄**：
-  收起后正文向左占满侧边栏让出的位置，所以页头左上角的开关、Logo 和正文左边缘始终在同一条线上，开关也不会移动（T3 的验收要求）。
+  收起后正文向左占满侧边栏让出的位置，所以页头左上角的开关、Logo 和正文左边缘始终在同一条线上，开关也不会移动。
 - **侧边栏**是正文区网格的第一栏，与正文之间隔核心的 `--d-main-content-gap`；它不改变页面级边缘。
 - **右栏**（见「右栏」）的右边缘就是页面级的右边缘：话题列表页它是网格的最后一栏，话题页它是时间线那一栏，两者右边缘重合。
   右栏出现时话题列表变窄，话题级栏宽不变（话题页的右栏本来就在帖子右侧的空位里）。
@@ -142,12 +140,12 @@ docker cp infra/discourse/import_theme.rb app:/tmp/ && \
 | 侧边栏项、话题列表行 | 底色变 `--d-hover` | 底色变 `--d-selected` | 焦点环（列表行：标题链接得到焦点时环套在整行） |
 
 - **选中态**：荧光笔，即加粗加 `--gtmc-highlighter`（文字下半截一层半透明强调色），套在文字所在的行内元素上。
-  不用左边框竖条，不用整行底色（`AGENTS.md`「界面规则」）。侧边栏当前所在的条目就是这样，图标同时换成强调色。
+  侧边栏当前所在的条目就是这样，图标同时换成强调色。选中态样式见 `AGENTS.md`「界面规则」。
 - **方块下沿**：实心按钮底部 `--gtmc-block-edge-height` 的深色内阴影，像方块的立体边。只给实心按钮，扁平按钮没有底色，加了会像一道划痕。
 - **焦点环**：`--gtmc-focus-ring-width` 粗的 `--tertiary` 描边，外移 `--gtmc-focus-ring-offset`。核心让大多数控件的键盘焦点和悬停长得一样，
   键盘用户分不清焦点在哪，所以这里统一加环。`--tertiary` 对两套配色的页面底色都超过 3:1（WCAG 非文字对比度）。
   只用 `:focus-visible`，鼠标点击不出环。
-- **减少动态效果**：系统开了「减少动态效果」（`prefers-reduced-motion: reduce`）时过渡时长为 0，按下时不位移。
+- **减少动态效果**：`prefers-reduced-motion: reduce` 时过渡时长为 0，按下时不位移。
 - **不可点的东西没有悬停效果**。首页的服务器状态卡片是信息块不是链接，只和全站统一边框和圆角；卡片里的复制按钮和地图链接按上表走。
 
 ### 动效
@@ -284,7 +282,7 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 ## 右栏
 
 设计稿 C 是三栏：左侧边栏、中间内容、右栏（`design/mockups/c-server-first.html`、`c-topic.html`）。
-主题只提供右栏的位置、一个插件出口和面板的外观；服务器、新人进服、近期活动这些面板由插件渲染（PLAN T5b）。
+主题只提供右栏的位置、一个插件出口和面板的外观；服务器、新人进服、近期活动这些面板由插件渲染（见 gtmc-forum-infra 的 `PLAN.md` 第 4 节的 `gtmc-right-rail` 出口）。
 
 - **插件出口 `gtmc-right-rail`**：插件用 `api.renderInOutlet("gtmc-right-rail", 组件)` 把面板放进右栏。
   出口参数只有 `topic`：话题页是当前话题（核心的 Topic 模型），话题列表页是 `null`。插件按它决定在哪类页面出现。
@@ -296,7 +294,7 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
     也就是时间线所在的那一栏：帖子那一栏约 760px，再加一条独立的右栏放不下，而时间线那一栏本来就在帖子右边、宽度相当。
     栏里从上到下是参与者、同版块话题、`gtmc-right-rail` 出口，最后是核心的时间线，当作「阅读进度」面板。
     时间线放在最下面，是因为只有它需要在滚动时一直留在屏幕上（sticky），上面几块随页面滚走。
-  - 手机宽度不显示右栏，插件在手机上自己换形态（PLAN T5b）。
+  - 手机宽度不显示右栏，插件在手机上自己换形态。
 - **宽度**：`--gtmc-right-rail-width`（300px），列表页和话题页相同，右边缘都对齐页面级的右边缘。
 - **面板外观**：外层用 `gtmc-rail-panel` 类，标题用 `h3.gtmc-rail-panel-title`（右侧可放一个 `small` 作计数），
   空状态和失败时的一句话用 `p.gtmc-rail-panel-placeholder`。面板之间的间隔由右栏统一给出，面板自己不加外边距。
@@ -314,7 +312,7 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
   默认贴着鼠标并跟随；键盘聚焦时立即出现，锚定在控件上；鼠标第一次停留等 `--gtmc-tooltip-delay`（400ms）再淡入；
   放不下时翻到对侧（锚定控件时先对侧、再另一轴，贴鼠标时左右、上下各自翻），始终完整留在视口里；点击、Esc、移开即收起。
   触屏上点按不出提示。
-- **可选属性**（写在元素或祖先上，就近生效）：
+- **可选属性**（写在元素或祖先上，就近生效；`data-tooltip` 的值是纯文本，空字符串等于没有提示）：
   - `data-tooltip-anchor="target"`：锚定在控件上而不是贴鼠标。
   - `data-tooltip-placement="top|bottom|left|right"`：锚定时画在哪一侧，默认 `bottom`。水平排列的控件不要用 `left`/`right`，会盖住相邻的控件。
   - `data-tooltip-group`（写在容器上）：容器里相邻的控件共用「热窗口」，第一次等延迟，之后在组内换控件立即换内容、不再淡入；离开容器就收起。
@@ -344,11 +342,3 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
   页脚外层带核心的 `.wrap` 类，宽度和左右边缘与页头、正文一致；它在侧边栏所在的网格之外，侧边栏展开时由 `desktop/desktop.scss` 让出左边一栏，否则会比正文偏左。
 - **商标声明**：Minecraft 是 Mojang Synergies AB 的商标；本站是学生社团自办，与 Mojang、Microsoft 无关。
   这句话要保留，文字改动前先和负责人确认。
-
-## 待验证
-
-下面这些还**没有逐项在运行中的站上核对过**（只做了静态检查，或只对照过核心源码）：
-
-- 桌面和手机宽度下，首页、话题页、发帖框、用户页、管理后台有没有错位或看不清的文字。
-- 像素字体是否被 Discourse 正确上传并通过 `$gtmc-pixel-font` 注入（浏览器开发者工具里看 `@font-face` 的 `src` 是否是 `/uploads/...`）。
-- 从 Git 安装后像素字体资源是否上传成功（两套配色由 `import_theme.rb` 检查，缺了会报错退出）。
