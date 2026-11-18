@@ -1,0 +1,17 @@
+# 主题设置。后台 → 外观 → 主题 → GTMC → 设置里能看到和修改；说明文字在 locales/*.yml 的 theme_metadata.settings。
+# 三个链接都可以留空，留空时页脚不显示对应的链接。
+
+# Discord 邀请链接没有可以写死的默认值（邀请会过期、会重建），由管理员在后台填。
+discord_invite_url:
+  type: string
+  default: ""
+
+# 下面两个由 infra/discourse/sidebar.rb 写入（「新人指南」置顶帖、「白名单与申诉」版块的地址），不要手改。
+# 版块地址带数据库 id，每个站点不同，所以不能写死在主题里。
+footer_newcomer_guide_url:
+  type: string
+  default: ""
+
+footer_appeal_url:
+  type: string
+  default: ""

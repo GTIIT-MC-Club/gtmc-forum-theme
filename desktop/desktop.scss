@@ -1,0 +1,95 @@
+// 仅桌面端的样式。
+
+// 页面级边缘：页头、正文区、页脚（都是核心的 .wrap）始终取侧边栏展开时的宽度，侧边栏收起时也不变窄。
+// 原因：核心只在侧边栏展开时用 `body.has-sidebar-page .wrap` 加宽 .wrap，收起时变回 --d-max-width，
+// 居中的页头和正文整体平移（1440px 宽时侧边栏开关从 x=56 跳到 x=176），正文左边缘也不再和开关、Logo 对齐。
+// 固定宽度后，收起侧边栏时正文向左占满让出的位置，开关不动，三者共用同一对左右边缘。
+// 与核心 `.wrap` 的针对性相同，靠主题样式表在核心之后加载取胜；侧边栏展开时核心给出的值和这里相同，不冲突。
+// 公式必须写在这里而不能存成 :root 上的变量：核心只在内层元素上把 --d-sidebar-width 设成 15em，
+// :root 上仍是 17em，在 :root 算好的值会宽出 32px，收起侧边栏时开关就会左移。
+// 手机宽度不加载本文件（样式表带 media="(width >= 40rem)"），手机上 .wrap 本来就占满屏宽。
+.wrap {
+  max-width: calc(var(--d-sidebar-width) + var(--d-max-width));
+}
+
+// 页脚跟着正文对齐：侧边栏展开时正文区的网格让出左边一栏（侧边栏）加一个间隙。
+// 页脚在那个网格之外（出口 below-footer），得自己让出同样的宽度。
+body.has-sidebar-page .gtmc-footer {
+  padding-left: calc(
+    var(--d-wrap-padding-x) + var(--d-sidebar-width) + var(--d-main-content-gap)
+  );
+}
+
+// 核心在视口窄于 64rem（它的 lg 断点）时，只在 #main-outlet-wrapper 上把正文与侧边栏的间隙从 --space-8 收到 --space-4；
+// 页脚不在那个元素里，读到的还是 :root 上的 --space-8，不照做就会比话题列表偏右 16px。
+@media (width < 64rem) {
+  body.has-sidebar-page .gtmc-footer {
+    --d-main-content-gap: var(--space-4);
+  }
+}
+
+// 话题列表页的右栏（gtmc-right-rail.gjs）：组件出现时给 body 加 gtmc-has-right-rail，正文区网格多分出最右一栏。
+// 网格的区域名和侧边栏那一栏照抄核心（discourse.scss 的 #main-outlet-wrapper），只在后面加一栏 rail；
+// 针对性比核心的 `body.has-sidebar-page #main-outlet-wrapper` 高一级，不靠加载顺序。
+body.gtmc-has-right-rail #main-outlet-wrapper {
+  grid-template-areas:
+    "sidebar content rail"
+    "sidebar below-content rail";
+  grid-template-columns: 0 minmax(0, 1fr) var(--gtmc-right-rail-width);
+}
+
+body.gtmc-has-right-rail.has-sidebar-page #main-outlet-wrapper {
+  grid-template-columns:
+    var(--d-sidebar-width) minmax(0, 1fr)
+    var(--gtmc-right-rail-width);
+}
+
+.gtmc-right-rail {
+  grid-area: rail;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  // 与正文区的第一行（#main-outlet 的上内边距）对齐
+  padding-top: var(--main-outlet-padding-top);
+}
+
+// 侧边栏收起时核心把网格间隙设为 0（侧边栏那一栏宽 0，间隙会让正文右移），右栏自己留出与正文的间隔
+body.gtmc-has-right-rail:not(.has-sidebar-page) .gtmc-right-rail {
+  margin-left: var(--d-main-content-gap);
+}
+
+// 话题页的右栏就是核心时间线所在的那一栏（gtmc-topic-rail.gjs）。
+// 核心让整栏 sticky；右栏比时间线高出参与者、同版块话题几块，整栏 sticky 时下半截要读到帖子末尾才露出来。
+// 改成整栏随页面滚动、只有时间线 sticky：上面几块滚走，时间线（阅读进度）一直留在屏幕上。
+// sticky 的偏移照抄核心给 .topic-navigation 的值（topic.scss）。
+// 核心的选择器是 `.container.posts .topic-navigation`，这里多一个 .with-timeline（核心渲染时间线时才有），针对性更高。
+.container.posts .topic-navigation.with-timeline {
+  position: static;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: var(--gtmc-right-rail-width);
+
+  // 核心给栏里每个子元素加 0.5em 的下边距，这里改由上面的 gap 统一间隔
+  > * {
+    margin-bottom: 0;
+  }
+
+  // 时间线即右栏里的「阅读进度」面板，外观与 .gtmc-rail-panel 相同
+  .timeline-container {
+    position: sticky;
+    top: calc(var(--header-offset, 60px) + 1.5em);
+    padding: var(--space-4);
+    border: 1px solid var(--content-border-color);
+    border-radius: var(--d-border-radius);
+  }
+}
+
+.gtmc-topic-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}

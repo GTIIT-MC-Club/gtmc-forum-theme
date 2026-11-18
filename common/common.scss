@@ -1,0 +1,445 @@
+// 手机和桌面共用的样式。颜色一律来自配色方案（about.json 的 color_schemes），这里只用变量。
+
+// 像素字体只用于标签（版块标签、置顶、版本号）、在线人数和日期块（见 README「视觉规范 · 字体与字号」）；
+// 正文、标题、按钮、提示一律系统字体，读得清楚。
+// 字体来自 Fusion Pixel 12px 的子集，字形按 12px 网格绘制；
+// 字号取 12px 的整数倍才能让每个像素格对应整数个屏幕像素，否则边缘发虚。
+// $gtmc-pixel-font 由 about.json 的 assets 注入，值是上传后文件的 URL。
+@font-face {
+  font-family: "GTMC Pixel";
+  src: url($gtmc-pixel-font) format("woff2");
+  font-display: swap;
+}
+
+:root {
+  // 右栏宽度，取自设计稿 c-server-first.html：放得下服务器面板一行（图标块、服名、版本、人数）不折行
+  --gtmc-right-rail-width: 300px;
+
+  // 像素图标按 8×8 网格画，显示尺寸只取 8px 的整数倍，一格才对应整数个屏幕像素（README「图标」）
+  --gtmc-icon-size: 16px;
+
+  // 子集之外的字（生僻字、emoji）回落到站点正文字体，而不是浏览器默认的衬线体
+  --gtmc-font-pixel: "GTMC Pixel", var(--font-family);
+
+  // 像素字体的字号：标签 12px，在线人数、日期块这类大数字 24px、36px（都是 12px 的整数倍，原因见上）
+  --gtmc-pixel-font-size: 12px;
+  --gtmc-pixel-font-size-large: 24px;
+  --gtmc-pixel-font-size-huge: 36px;
+
+  // 方块感：核心默认 4px，收到 2px
+  --d-border-radius: 2px;
+
+  // 导航下划线加粗，边框硬朗
+  --d-nav-underline-height: 0.2em; // 核心默认 0.125em（2px），加粗到约 3px 才有「硬」的感觉
+
+  // 话题列表更紧凑，一屏多看几条
+  --d-topic-list-data-padding-y: var(--space-2);
+  --d-topic-list-header-data-padding-y: var(--space-2);
+  --d-topic-list-title-font-size: var(--font-0);
+
+  // 选中态一律用「荧光笔」：加粗，文字下半截涂一层半透明强调色（AGENTS.md「界面规则」）。
+  // 比例取自设计稿 c-server-first.html：从 62% 高度往下涂，强调色 35% 不透明，正好压在字的下半截，不盖住笔画。
+  // 别处的选中态（插件里的也一样）用 `background: var(--gtmc-highlighter)` 套在文字所在的行内元素上。
+  --gtmc-highlighter: linear-gradient(
+    transparent 62%,
+    color-mix(in srgb, var(--tertiary) 35%, transparent) 62%
+  );
+
+  // 核心的 text-accent 令牌由 tertiary 的派生色算出，绿色强调色下对比度不足 AA，直接用 tertiary
+  --token-color-text-accent: var(--tertiary);
+  --token-color-text-accent-bolder: var(--tertiary);
+
+  // 动效只用这三个令牌（AGENTS.md「界面规则」，README「视觉规范 · 动效」），主题和插件共用。
+  // 状态切换 120ms：快到点下去感觉不到延迟，又能让颜色切换不生硬。
+  --gtmc-duration-state: 120ms;
+
+  // 提示停留 400ms 才出现，鼠标扫过不会闪
+  --gtmc-tooltip-delay: 400ms;
+
+  // 先快后慢的减速曲线，取自设计稿 c-server-first.html
+  --gtmc-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  // 实心按钮的方块下沿。颜色取核心的 --always-black-rgb，浅深色方案下都成立；
+  // 它的值是逗号分隔的 r, g, b，所以只能用逗号写法 rgb(r, g, b, alpha)。
+  // 2px、0.3 不透明度是在两套配色下都看得出又不抢眼的经验值。
+  --gtmc-block-edge-height: 2px;
+  --gtmc-block-edge-color: rgb(var(--always-black-rgb), 0.3);
+
+  // 按下时下沿消失、整体下移 1px，像方块被按进去
+  --gtmc-pressed-offset: 1px;
+
+  // 键盘焦点环：2px 粗、外移 2px，中间露出一圈页面底色，主按钮（底色也是 --tertiary）上也看得清
+  --gtmc-focus-ring-width: 2px;
+  --gtmc-focus-ring-offset: 2px;
+
+  // 核心按钮的过渡默认是 none，它把这个变量整个写进 transition 属性，所以这里逐个列出属性，不用 all
+  --d-button-transition:
+    background-color var(--gtmc-duration-state) var(--gtmc-ease),
+    color var(--gtmc-duration-state) var(--gtmc-ease),
+    border-color var(--gtmc-duration-state) var(--gtmc-ease),
+    box-shadow var(--gtmc-duration-state) var(--gtmc-ease),
+    transform var(--gtmc-duration-state) var(--gtmc-ease);
+}
+
+// 「减少动态效果」只把动画时长归零；提示的出现延迟不是动画，照旧，免得鼠标扫过时提示乱闪
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --gtmc-duration-state: 0s;
+    --gtmc-pressed-offset: 0;
+  }
+}
+
+// 像素字体的文字：标签、在线人数、日期块。插件里的这些元素也加 gtmc-pixel-text 类，
+// 大数字再把 font-size 换成 --gtmc-pixel-font-size-large / -huge（README「视觉规范 · 字体与字号」）。
+// 版块标签（话题列表、话题标题下、版块选择器里的版块名）是核心渲染的，只能选核心的类；核心改了类名会退回系统字体，不影响阅读。
+// 像素字体没有粗体，浏览器合成的粗体会让笔画糊在一起；关掉抗锯齿，笔画边缘才是硬的
+// （只有 macOS 上的 Chromium 和 Safari 认 -webkit-font-smoothing，别的平台本来就按系统设置渲染）。
+.gtmc-pixel-text,
+.badge-category__name {
+  font-family: var(--gtmc-font-pixel);
+  font-size: var(--gtmc-pixel-font-size);
+  font-weight: normal;
+  -webkit-font-smoothing: none;
+}
+
+// 置顶标签（gtmc-pinned-label.gjs）：强调色底，与按钮同色，深浅两套配色都取配色方案的对比色
+.gtmc-pinned-label {
+  display: inline-block;
+  margin-right: var(--space-2);
+  padding: 0 var(--space-1);
+  border-radius: var(--d-border-radius);
+  background: var(--tertiary);
+  color: var(--secondary);
+  line-height: var(--line-height-medium);
+  vertical-align: middle;
+}
+
+// 有了置顶标签，核心那个只是标示用的图钉图标就重复了，隐藏它；
+// 能点的图钉（.pin-toggle-button，可以取消置顶）是控件，保留
+.topic-list .topic-status.--pinned:not(.pin-toggle-button) {
+  display: none;
+}
+
+// 话题级栏宽（README「视觉规范 · 布局」）：标题、帖子、按钮行、推荐话题共用一栏。
+// 核心让推荐话题取 --d-max-width 的 87%（1440 宽时约 966px），标题栏随父元素伸展（约 951px），
+// 都比帖子和按钮行（约 759px）宽，右边缘参差不齐。这里照抄核心算 #topic-footer-buttons 宽度的公式，
+// 核心调整帖子宽度时跟着变。手机宽度下栏宽大于屏宽，不起作用。
+#topic-title .title-wrapper,
+.more-topics__container {
+  max-width: calc(
+    var(--topic-avatar-width) + var(--topic-body-width) +
+      var(--topic-body-width-padding) * 2
+  );
+}
+
+// 推荐话题下面的「想阅读更多？请浏览……」是一句提示，核心用 h3 渲染（约 18.7px 粗体），比上面的列表标题还显眼。
+// 按 README 的字号层级降为正文字号、常规字重、次要文字色；里面的版块和链接保持各自的颜色。
+.more-topics__browse-more {
+  color: var(--primary-medium);
+  font-size: var(--font-0);
+  font-weight: normal;
+}
+
+// 社团 Logo 是像素画（design/brand/gtmc-logo-3x.png，由管理员在后台上传）。浏览器缩放图片时默认做平滑插值，
+// 像素边缘会糊成一片；pixelated 让每个像素保持方块。
+#site-logo {
+  image-rendering: pixelated;
+}
+
+// 实心按钮（默认、主、危险、成功；不带变体类的 .btn 核心也按默认按钮画）：方块下沿，按下时下沿消失并下移。
+// 扁平、透明、链接样式的按钮没有底色，加下沿会像一道划痕，按下时改为换底色（见下一条）。
+.btn:not(.btn-flat, .btn-transparent, .btn-link) {
+  box-shadow: inset 0 calc(-1 * var(--gtmc-block-edge-height)) 0
+    var(--gtmc-block-edge-color);
+
+  &:active:not(:disabled, .disabled) {
+    box-shadow: none;
+    transform: translateY(var(--gtmc-pressed-offset));
+  }
+}
+
+// 扁平和透明按钮（帖子下的图标按钮、编辑器工具栏等）按下时换成「选中」底色。
+// 核心的悬停规则是 `.discourse-no-touch .btn-flat:hover`，按下时它同时生效，所以这里用同样的针对性、靠加载顺序压过它。
+// 帖子下的按钮核心另有一条 `.discourse-no-touch nav.post-controls .actions button:active`，
+// 把按下画成悬停色，只能照它的选择器写一遍。
+.discourse-no-touch .btn-flat:active:not(:disabled, .disabled),
+.discourse-no-touch .btn-transparent:active:not(:disabled, .disabled),
+.discourse-no-touch nav.post-controls .actions button:active {
+  background: var(--d-selected);
+}
+
+// 侧边栏项和话题列表行：悬停换 --d-hover 底色，按下换 --d-selected，颜色变化带同一个过渡时长。
+// 侧边栏的悬停色核心已经给了；话题列表行核心没有悬停效果。
+// 只在能悬停的设备上加悬停色：触屏浏览器会把 :hover 留在滚动起点那一行上（核心侧边栏同样这么处理）。
+.sidebar-section-link-wrapper .sidebar-section-link {
+  transition: background-color var(--gtmc-duration-state) var(--gtmc-ease);
+
+  &:active {
+    background: var(--d-selected);
+  }
+}
+
+.topic-list-item {
+  transition: background-color var(--gtmc-duration-state) var(--gtmc-ease);
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--d-hover);
+    }
+  }
+
+  &:active {
+    background-color: var(--d-selected);
+  }
+}
+
+// 键盘焦点环。核心给 .btn、.btn-flat、帖子下的按钮、侧边栏项的 :focus-visible 写了 outline: none，
+// 焦点只表现为悬停色，键盘用户分不清焦点停在哪里。这里的选择器与核心那几条针对性相同，
+// 靠主题样式表在核心之后加载取胜。只用 :focus-visible，鼠标点击不会出环。
+a:focus-visible,
+.btn:focus-visible,
+.btn-flat:focus-visible,
+.discourse-no-touch nav.post-controls .actions button:focus-visible {
+  outline: var(--gtmc-focus-ring-width) solid var(--tertiary);
+  outline-offset: var(--gtmc-focus-ring-offset);
+}
+
+// 侧边栏和话题列表的容器会裁掉超出边界的内容，外移的环会被切掉一半，所以这两处把环画在元素内侧。
+// 话题列表的标题链接本身被核心去掉了焦点样式（它原本靠键盘快捷键的 .selected 标示），环画在整行上。
+.sidebar-section-link-wrapper .sidebar-section-link:focus-visible,
+.topic-list-item:has(.title:focus-visible) {
+  outline: var(--gtmc-focus-ring-width) solid var(--tertiary);
+  outline-offset: calc(-1 * var(--gtmc-focus-ring-width));
+}
+
+// 全站页脚（javascripts/discourse/components/gtmc-footer.gjs）。
+// 外层带核心的 .wrap 类，宽度、居中和左右留白都由它给出，和页头、正文共用同一对边缘；
+// 侧边栏展开时正文让出左边一栏，页脚在 desktop/desktop.scss 里跟着让出。手机宽度下链接自动换行。
+.gtmc-footer {
+  box-sizing: border-box;
+  margin-top: var(--space-8);
+}
+
+.gtmc-footer-content {
+  padding: var(--space-6) 0;
+  border-top: 2px solid var(--primary-low);
+  color: var(--primary-medium);
+  font-size: var(--font-down-1);
+  line-height: var(--line-height-large);
+}
+
+.gtmc-footer-about {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  align-items: baseline;
+}
+
+.gtmc-footer-club-name {
+  color: var(--primary);
+  font-weight: bold;
+}
+
+.gtmc-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: var(--space-3) 0;
+  padding: 0;
+  list-style: none;
+
+  a {
+    color: var(--tertiary);
+  }
+}
+
+.gtmc-footer-disclaimer {
+  margin: 0;
+  font-size: var(--font-down-2);
+}
+
+// 像素图标的显示尺寸。核心按所在位置的字号缩放图标（版块徽章约 13px、侧边栏约 14px），
+// 不是 8 的整数倍时一格像素会被拉成宽窄不一的条。核心的图标都带 d-icon-<图标名> 类，这里只挑出主题自己的 gtmc- 图标。
+// 版块徽章里核心用 `.badge-category__wrapper .badge-category.--style-icon .d-icon` 定成 0.74em，
+// 第二个选择器与它针对性相同，靠主题样式表在核心之后加载取胜。
+.d-icon[class*="d-icon-gtmc-"],
+.badge-category__wrapper
+  .badge-category.--style-icon
+  .d-icon[class*="d-icon-gtmc-"] {
+  width: var(--gtmc-icon-size);
+  height: var(--gtmc-icon-size);
+}
+
+// 右栏的面板（话题页的参与者、同版块话题；插件的服务器、新人进服等面板也用这个类，见 README「右栏」）。
+// 面板只是信息块，不是链接，没有悬停效果；面板里能点的东西各自按交互规则走。
+.gtmc-rail-panel {
+  margin: 0; // 面板之间的间隔由右栏的 gap 统一给出
+  padding: var(--space-4);
+  border: 1px solid var(--content-border-color);
+  border-radius: var(--d-border-radius);
+  font-size: var(--font-down-1);
+}
+
+.gtmc-rail-panel-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-0);
+
+  small {
+    color: var(--primary-medium);
+    font-size: var(--font-down-1);
+    font-weight: normal;
+  }
+}
+
+// 空状态和失败时的一句话；与有内容时的第一行同高，面板不会因为没内容而塌下去
+.gtmc-rail-panel-placeholder {
+  margin: 0;
+  color: var(--primary-medium);
+}
+
+// 参与者头像：核心的 TopicParticipants 组件，样式核心只写在话题地图里（.topic-map__users-content 下），
+// 这里只取它的两个内层类。头像取 24px，与设计稿一致，是 8 的整数倍。
+.gtmc-topic-participants {
+  --gtmc-participant-avatar-size: 24px;
+
+  .topic-map__users-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  a {
+    position: relative;
+    display: block;
+  }
+
+  img.avatar {
+    display: block;
+    width: var(--gtmc-participant-avatar-size);
+    height: var(--gtmc-participant-avatar-size);
+    border-radius: var(--d-border-radius);
+  }
+
+  // 帖子数角标：贴在头像右上角
+  .post-count {
+    position: absolute;
+    top: calc(-1 * var(--space-1));
+    right: calc(-1 * var(--space-1));
+    padding: 0 var(--space-1);
+    border-radius: var(--d-border-radius);
+    background: var(--primary-medium);
+    color: var(--secondary);
+    font-size: var(--font-down-3);
+    line-height: var(--line-height-medium);
+  }
+}
+
+.gtmc-same-category-topics-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li + li {
+    border-top: 1px dashed var(--content-border-color);
+  }
+
+  a {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-2) 0;
+    color: var(--primary);
+  }
+}
+
+.gtmc-same-category-topic-age {
+  color: var(--primary-medium);
+}
+
+// 侧边栏当前所在的条目：不要核心的整行底色，加粗、文字套荧光笔，图标换成强调色（设计稿 c-server-first.html）。
+// 文字所在的 span 宽度只到文字末尾（核心给它 flex: 0 1 auto），荧光笔不会拉满整行。
+// 三个变量写在条目自己身上而不是 :root：核心的「upcoming change」（body 上的 uc-modernize-foundation-theme 类）
+// 在 body 上重新定义了它们，:root 上的值传不下来。
+// 版块条目的图标颜色是核心写在元素上的行内样式（版块颜色），压不过，也不该压：版块颜色是识别版块用的。
+.sidebar-section-link.active {
+  --d-sidebar-active-background: transparent;
+  --d-sidebar-active-color: var(--primary);
+  --d-sidebar-active-font-weight: bold;
+
+  .sidebar-section-link-content-text {
+    background: var(--gtmc-highlighter);
+  }
+
+  .sidebar-section-link-prefix.icon {
+    color: var(--tertiary);
+  }
+}
+
+// 全局提示的提示层（lib/gtmc-global-tooltip.js）。深底浅字、系统字体，与核心 DTooltip 改过的外观一致（见下一条）。
+// 位置由脚本写进 left/top；淡入用状态时长，延迟由脚本按 --gtmc-tooltip-delay 计时，这里不再加 transition-delay。
+// 提示层里的字永远是系统字体：它可能出现在关了抗锯齿的像素字体元素旁边，这里显式恢复抗锯齿。
+// 最大宽度：一行约 20 个汉字就换行，再长的说明不该塞进提示里；窄屏上不超过视口的 70%。
+.gtmc-tooltip-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: z("max");
+  box-sizing: border-box;
+  max-width: min(20em, 70vw);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--d-border-radius);
+  background: var(--primary);
+  color: var(--secondary);
+  font-family: var(--font-family);
+  font-size: var(--font-down-1);
+  -webkit-font-smoothing: auto;
+  line-height: var(--line-height-medium);
+  white-space: pre-line;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--gtmc-duration-state) var(--gtmc-ease);
+
+  &.open {
+    opacity: 1;
+  }
+
+  // 同组内换控件：只换内容，不重新淡入
+  &.instant {
+    transition: none;
+  }
+}
+
+// 核心的 DTooltip（float-kit，例如帖子下的按钮、时间线上的提示）只改外观，与全局提示一致：深底浅字、系统字体、
+// 主题圆角、动效令牌；行为、位置计算不动。选择器与核心 d-tooltip.scss 的同一层级，靠主题样式表后加载取胜。
+// 用户引导气泡（user tip）也用这个元素，核心用针对性更高的 [data-content][data-identifier="user-tip"] 给它强调色底，不受影响。
+.fk-d-tooltip__content {
+  // 箭头是核心注入的 SVG，两条路径分别取这两个变量；跟着底色一起换，否则深底上挂一个浅色箭头
+  --float-kit-arrow-stroke-color: var(--primary);
+  --float-kit-arrow-fill-color: var(--primary);
+  border: none;
+  border-radius: var(--d-border-radius);
+  background-color: var(--primary);
+  box-shadow: none;
+  color: var(--secondary);
+  font-family: var(--font-family);
+  font-size: var(--font-down-1);
+  -webkit-font-smoothing: auto;
+
+  &.-animated {
+    animation-duration: var(--gtmc-duration-state);
+    animation-timing-function: var(--gtmc-ease);
+  }
+
+  // 提示里偶尔有链接（如「谁点了赞」），深底上的强调色对比度不够，改用正文同色加下划线
+  a {
+    color: inherit;
+    text-decoration: underline;
+  }
+}
+
+.fk-d-tooltip__inner-content {
+  padding: var(--space-1) var(--space-2);
+}
