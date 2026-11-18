@@ -3,6 +3,17 @@
 Discourse 主题：浅色、深色两套配色跟随系统，草方块绿强调色，圆角收小、边框硬朗；**开源像素字体只用于标签、在线人数和日期块**，其余一律系统字体。
 不使用 Mojang 的任何素材，不复刻 Linux.do 的视觉稿。
 
+## 契约与规范
+
+本仓库是从 [gtmc-forum-infra](https://github.com/GTIIT-MC-Club/gtmc-forum-infra) 拆出来的，计划和规范只放在那边：
+
+- 接口契约见 gtmc-forum-infra 的 [`PLAN.md` 第 4 节](https://github.com/GTIIT-MC-Club/gtmc-forum-infra/blob/main/PLAN.md#4-接口契约)。
+  主题依赖插件 [gtmc-forum-plugin](https://github.com/GTIIT-MC-Club/gtmc-forum-plugin) 的接口，跨仓库的改动先改契约、再改插件、最后改主题（见那份文件的第 2 节）。
+- 代码规范见 gtmc-forum-infra 的 [`AGENTS.md`](https://github.com/GTIIT-MC-Club/gtmc-forum-infra/blob/main/AGENTS.md)，本仓库同样遵守。
+- 本文和代码注释里的 `PLAN`、`AGENTS.md`、`infra/`、`design/` 都指 gtmc-forum-infra 里的文件。
+
+以 Apache-2.0 许可发布，见 [`LICENSE`](LICENSE)；像素字体另有自己的许可，见 `fonts/`。
+
 ## 目录
 
 ```
@@ -16,9 +27,10 @@ javascripts/            页脚、右栏、置顶标签、全局提示的组件�
 test/                   QUnit 测试，随主题上传，见「全局提示 · 测试」
 locales/                主题描述、设置项说明（theme_metadata）和页脚的界面文字（中英文）
 settings.yml            主题设置：Discord 邀请链接和页脚的两个站内链接，见「页脚」
-assets/                 子集化后的像素字体（woff2）
+assets/                 子集化后的像素字体（woff2）和图标精灵 gtmc-icons.svg（由脚本生成，见「图标」）
 icons/                  像素图标，一个图标一个 .svg 文件，文件名就是图标名，见「图标」
 fonts/                  字体的许可文件、子集字符表（不随主题上传时也要保留，见下）
+scripts/                生成并检查图标精灵的脚本
 ```
 
 ## 开发
@@ -27,27 +39,28 @@ fonts/                  字体的许可文件、子集字符表（不随主题�
 
 ```sh
 gem install discourse_theme
-discourse_theme watch theme/        # 首次运行会问站点地址和 API Key，之后保存修改会实时同步
+discourse_theme watch .        # 在本仓库根目录执行； 首次运行会问站点地址和 API Key，之后保存修改会实时同步
 ```
 
 本地开发站的搭法不在本仓库里；视觉效果要在站上看，还没逐项看过的见本文末尾「待验证」。
 
 ## 部署到论坛
 
-主题放在仓库的 `theme/` 子目录。Discourse 的「从 Git 仓库安装」会克隆整个仓库并在仓库根目录找 `about.json`
-（核心的 `git_importer.rb` 里没有子目录选项），所以用压缩包导入。打包、导入、设默认主题、设配色都由
-`infra/discourse/import_theme.rb` 完成，不要在后台手动传压缩包：
+论坛从本仓库的 Git 地址安装主题（核心的「从 Git 仓库安装」，即远程主题），跟踪默认分支 `main`。
+安装或更新、设默认主题、设配色都由 gtmc-forum-infra 的 `infra/discourse/import_theme.rb` 完成，
+部署脚本 `infra/deploy-discourse.sh` 每次都会执行它，不要在后台手动安装或上传压缩包：
 
 ```sh
-docker cp theme app:/tmp/gtmc-theme && docker cp infra/discourse/import_theme.rb app:/tmp/ && \
+docker cp infra/discourse/import_theme.rb app:/tmp/ && \
   docker exec -u discourse -w /var/www/discourse app \
-    bundle exec rails runner /tmp/import_theme.rb /tmp/gtmc-theme
+    bundle exec rails runner /tmp/import_theme.rb
 ```
 
-脚本把 `theme/` 里除 `fonts/`、`icons/`、`README.md` 以外的文件打成压缩包（`fonts/` 和 README 只给仓库读者看），
-并把 `icons/` 里的图标拼成一个图标精灵一起打进去，已有 GTMC 主题就原地更新，没有就新建；
-导入后检查主题的样式和模板有没有编译错误，有就报错退出。改了主题后重跑即可，可重复执行；
-后台里设过的主题设置（如 `discord_invite_url`）不会被覆盖。
+脚本让论坛从 GitHub 克隆本仓库：已有 GTMC 主题就原地更新（压缩包导入的旧主题会原地改成远程主题，id 和主题设置不变），
+没有就新建；导入后检查主题的样式和模板有没有编译错误，有就报错退出。合并到 `main` 后重跑即可上线，可重复执行；
+后台里设过的主题设置（如 `discord_invite_url`）不会被覆盖。核心只导入它认识的文件（`about.json`、`common/`、
+`javascripts/`、`locales/`、`settings.yml`、`about.json` 里登记的 `assets/` 等），`icons/`、`fonts/`、`scripts/`
+和本文不会上传到论坛。
 
 ### 脚本替你做的设置
 
@@ -207,14 +220,14 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
   --output-file=fusion-pixel-12px-proportional-zh_hans-subset.woff2
 ```
 
-产物复制到 `theme/assets/`，文件名保持不变（`about.json` 里按这个路径注册）。
+产物复制到 `assets/`，文件名保持不变（`about.json` 里按这个路径注册）。
 `--name-IDs='*'` 是为了保留字体文件里的版权和许可字段（name 表的 0、13、14 号）。
 
 ## 图标
 
 `icons/` 里一个图标一个 `.svg` 文件，文件名（不含 `.svg`）就是图标名。Discourse 每个主题只认一个图标精灵
-（核心 `lib/svg_sprite.rb` 的 `icons-sprite`），所以 `infra/discourse/import_theme.rb` 在打包时把它们拼成
-`assets/gtmc-icons.svg`（只存在于压缩包里，仓库里没有这个文件），
+（核心 `lib/svg_sprite.rb` 的 `icons-sprite`），所以 `scripts/build_icon_sprite.rb` 把它们拼成
+`assets/gtmc-icons.svg`。论坛从 Git 安装主题时不跑任何构建步骤，所以这个生成的文件也提交在仓库里，
 导入主题后可以在任何填图标名的地方使用：版块的图标样式、侧边栏链接、`dIcon`。
 
 - **来源**：全部由本仓库从零绘制，原创，随主题同许可发布。**没有**描摹、取色或参照 Minecraft 原版贴图和图标（PLAN 第 0 节非目标），
@@ -225,7 +238,7 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
   `common/common.scss` 把所有 `gtmc-` 图标统一定为 `--gtmc-icon-size`（16px），不随所在位置的字号缩放。
   要更大的图标（如右栏的图标块）用 24px 或 32px，不要用别的值。
 - **设计稿**：`design/brand/icons-8x8/` 是设计阶段的同一套文件。以本目录为准，改图标改这里。
-- **文件**：`icons/gtmc-<英文名>.svg`，普通的独立 SVG，必须有 `viewBox`。打包时颜色会被统一换成 `currentColor`，
+- **文件**：`icons/gtmc-<英文名>.svg`，普通的独立 SVG，必须有 `viewBox`。生成精灵时颜色会被统一换成 `currentColor`，
   所以画的时候用什么颜色都行，但只能是单色剪影。
 
 | 图标 | 用在 |
@@ -261,9 +274,12 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 
 1. 用任何能导出 SVG 的工具在 8×8 画布上画（Inkscape、Figma 都行；像素画工具导出的 SVG 也可以），每格一个整数坐标的方块。
    8×8 只容得下剪影：线条 1 格，细节之间至少隔 1 格，否则 16px 下糊成一团。名字用 `gtmc-` 开头，免得和核心或插件的图标重名。
-2. 存成 `icons/gtmc-<英文名>.svg`（改已有图标就直接覆盖那个文件）。导入脚本会检查文件名和 `viewBox`，不合格就报错退出。
-3. 在上表补一行，提交，然后重新导入主题。
-4. 在浏览器里看 16px 下的效果：深浅两套配色都看一遍。
+2. 存成 `icons/gtmc-<英文名>.svg`（改已有图标就直接覆盖那个文件）。
+3. 在仓库根目录执行 `ruby scripts/build_icon_sprite.rb` 重新生成 `assets/gtmc-icons.svg`（只用 Ruby 标准库）。
+   脚本会检查文件名和 `viewBox`，不合格就报错退出。提交前用 `ruby scripts/build_icon_sprite.rb --check`
+   确认精灵和 `icons/` 一致，不一致时退出码为 1。
+4. 在上表补一行，把图标和精灵一起提交，合并后重新部署（或单独执行 `import_theme.rb`）。
+5. 在浏览器里看 16px 下的效果：深浅两套配色都看一遍。
 
 ## 右栏
 
@@ -335,4 +351,4 @@ pyftsubset fusion-pixel-12px-proportional-zh_hans.ttf.woff2 \
 
 - 桌面和手机宽度下，首页、话题页、发帖框、用户页、管理后台有没有错位或看不清的文字。
 - 像素字体是否被 Discourse 正确上传并通过 `$gtmc-pixel-font` 注入（浏览器开发者工具里看 `@font-face` 的 `src` 是否是 `/uploads/...`）。
-- 压缩包导入是否把 `about.json` 的两套配色、字体资源都建出来。
+- 从 Git 安装后像素字体资源是否上传成功（两套配色由 `import_theme.rb` 检查，缺了会报错退出）。
