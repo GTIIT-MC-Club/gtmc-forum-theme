@@ -168,7 +168,6 @@
   background: var(--d-selected);
 }
 
-// 侧边栏项和话题列表行：悬停换 --d-hover 底色，按下换 --d-selected，颜色变化带同一个过渡时长。
 // 侧边栏的悬停色核心已经给了；话题列表行核心没有悬停效果。
 // 只在能悬停的设备上加悬停色：触屏浏览器会把 :hover 留在滚动起点那一行上（核心侧边栏同样这么处理）。
 .sidebar-section-link-wrapper .sidebar-section-link {
@@ -323,7 +322,6 @@ a:focus-visible,
     border-radius: var(--d-border-radius);
   }
 
-  // 帖子数角标：贴在头像右上角
   .post-count {
     position: absolute;
     top: calc(-1 * var(--space-1));

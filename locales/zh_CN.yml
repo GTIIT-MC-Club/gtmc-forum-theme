@@ -19,7 +19,7 @@ zh_CN:
   gtmc_topic_list:
     pinned: "置顶"
   theme_metadata:
-    description: "GTMC 社团论坛主题：深色优先，草方块绿强调色，圆角收小，仅 Logo 使用像素字体。"
+    description: "GTMC 社团论坛主题：浅色、深色两套配色跟随系统，草方块绿强调色，圆角收小，像素字体只用于标签、在线人数和日期块。"
     settings:
       discord_invite_url: "页脚「加入 Discord」的邀请链接（https://discord.gg/…）。留空则页脚不显示这个链接。"
       footer_newcomer_guide_url: "页脚「新人指南」置顶帖的地址。由 infra/discourse/sidebar.rb 写入，不要手改。"
