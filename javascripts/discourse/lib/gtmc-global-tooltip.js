@@ -1,16 +1,8 @@
-// 全局悬停提示：任何元素写上 data-tooltip="说明文字" 就有提示，不用每处各包一个组件。
+// 全局悬停提示：任何元素写上 data-tooltip="说明文字" 就有提示，不用每处各包一个组件（用法见 README「全局提示」）。
 // 移植自 OpenCard 的 globalTooltip.ts（规则见其 docs/UI_RULES.md「浮层提示」），去掉了 Vue 渲染和对话框作用域。
-//
 // 这是全站唯一直接操作 DOM 的代码（AGENTS.md「界面规则」的例外条款）：提示要在文档级监听指针和焦点事件，
-// 并按目标元素和视口的实时几何位置摆放提示层，这些都不是模板能表达的。DOM 读写全部集中在本文件；
-// 提示层元素本身由 components/gtmc-tooltip-layer.gjs 渲染，它只负责创建元素、安装和卸载。
-//
-// 元素上可以声明的属性（都可以写在祖先元素上，就近生效）：
-//   data-tooltip            提示文字（纯文本）。空字符串等于没有提示。
-//   data-tooltip-placement  top | bottom | left | right，锚定在控件上时画在哪一侧，默认 bottom；放不下先翻到对侧，再试另一轴。
-//   data-tooltip-anchor     target：锚定在控件上；不写则贴着鼠标并跟随。键盘聚焦时一律锚定在控件上。
-//   data-tooltip-group      写在容器上：容器里的控件共用一个「热窗口」，第一次等延迟，之后在组内换控件立即换内容。
-//   data-tooltip-overflow   只在文字被截断（省略号）时才提示。
+// 并按目标元素和视口的实时几何位置摆放提示层，这些都不是模板能表达的；提示层元素本身由
+// components/gtmc-tooltip-layer.gjs 创建和安装。行为测试在 test/unit/lib/gtmc-global-tooltip-test.js。
 
 const TOOLTIP_SELECTOR = "[data-tooltip]";
 const PLACEMENT_ATTRIBUTE = "data-tooltip-placement";
@@ -26,8 +18,7 @@ const VIEWPORT_EDGE_PADDING_PX = 8;
 // 文字盒比裁剪它的祖先宽出这么多像素才算被截断，避免边框和取整造成误判
 const CLIP_TOLERANCE_PX = 1;
 
-// 一个组在最后一次显示提示后保持「热」的时间。窗口内移到同组的下一个控件，提示立即出现；
-// 停顿超过这个时间再移过去，又要等完整的延迟。与 --gtmc-tooltip-delay 同量级，停顿一下就算新的一次。
+// 组内「热窗口」：这段时间里换控件立即显示，超时则重新等一次延迟。
 const WARM_WINDOW_MILLIS = 400;
 
 // 在同组里从一个控件移到下一个时，中间会经过没有提示的空隙；空隙不超过这个时长就不收起提示，免得闪一下
@@ -193,7 +184,6 @@ function sameRect(first, second) {
  * 只在浏览器主线程上使用；所有状态都在实例里，同一文档上装两个实例互不影响（测试里就是这样）。
  */
 export default class GtmcGlobalTooltip {
-  /** 用主题样式表里的 --gtmc-tooltip-delay 作为延迟，给页面上的提示层建一个实例。 */
   static forLayer(layer) {
     return new GtmcGlobalTooltip(layer, {
       delayMillis: readTooltipDelayMillis(layer),
@@ -219,10 +209,6 @@ export default class GtmcGlobalTooltip {
   #warmUntil = 0;
   #warmPlacement = null;
 
-  /**
-   * @param {HTMLElement} layer 提示层元素，已经在文档里
-   * @param {{delayMillis: number}} options 第一次出现前的停留时间，取自 CSS 变量 --gtmc-tooltip-delay
-   */
   constructor(layer, { delayMillis }) {
     this.#layer = layer;
     this.#document = layer.ownerDocument;
